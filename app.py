@@ -2,22 +2,28 @@ from fastapi import FastAPI, Request, Header, HTTPException
 import requests
 import os
 from openai import OpenAI
-from dotenv import load_dotenv
-
-load_dotenv()
 
 app = FastAPI()
 
-client = OpenAI(api_key=os.getenv("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"))
-
-SHEETS_WEBHOOK = os.getenv("SHEETS_WEBHOOK")
+# 🔐 Leer variables correctamente
+OPENAI_API_KEY = os.getenv("Osk-proj-vuiA1O2c_sST8UAA6auifn8PFKsxFf0EtuQ3bdVRVMlIdR-tYyEZOotiSPB2blNSDaUJ5oy7XJT3BlbkFJTShjJpX-0mugP-2AKBaEL2_h9wUWX3JB3WVu5I21GftedvvXz9b0GuBLdJgoLKuycmBIF10T4A")
 TOKEN = os.getenv("BP_PROXY_TOKEN")
+SHEETS_WEBHOOK = os.getenv("SHEETS_WEBHOOK")
+
+# Validaciones al iniciar (clave para evitar crash silencioso)
+if not OPENAI_API_KEY:
+    raise Exception("Falta OPENAI_API_KEY")
+
+if not TOKEN:
+    raise Exception("Falta BP_PROXY_TOKEN")
+
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 
 @app.post("/chat")
 async def evaluar(request: Request, x_bp_token: str = Header(None)):
 
-    # Seguridad básica (igual que Buscaprop)
+    # Seguridad básica
     if x_bp_token != TOKEN:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
@@ -53,14 +59,15 @@ Responde SOLO en JSON:
 
     result_text = response.choices[0].message.content
 
-    # 🔥 MVP: reenvío directo sin parsear
-    try:
-        requests.post(SHEETS_WEBHOOK, json={
-            "timestamp": body.get("timestamp"),
-            "resultado": result_text
-        })
-    except Exception as e:
-        print("Error enviando a Sheets:", e)
+    # Enviar a Google Sheets solo si existe webhook
+    if SHEETS_WEBHOOK:
+        try:
+            requests.post(SHEETS_WEBHOOK, json={
+                "timestamp": body.get("timestamp"),
+                "resultado": result_text
+            })
+        except Exception as e:
+            print("Error enviando a Sheets:", e)
 
     return {
         "status": "ok",
