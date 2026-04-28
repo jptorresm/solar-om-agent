@@ -8,7 +8,7 @@ load_dotenv()
 
 app = FastAPI()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("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"))
 
 SHEETS_WEBHOOK = os.getenv("SHEETS_WEBHOOK")
 TOKEN = os.getenv("BP_PROXY_TOKEN")
