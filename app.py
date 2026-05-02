@@ -50,52 +50,24 @@ async def analyze(data: List[Dict], x_bp_token: str = Header(None)):
     #     raise HTTPException(status_code=401, detail="Unauthorized")
 
     prompt = f"""
-Eres un sistema avanzado de monitoreo O&M solar, actuando como ingeniero experto.
+Eres un jefe de operación y mantenimiento (O&M) de plantas solares.
 
-Analiza los siguientes datos como una serie temporal operacional de planta solar:
+Debes responder SOLO en base al análisis disponible.
 
-{data}
+ANÁLISIS DEL SISTEMA:
+{context}
 
-Debes detectar:
-- anomalías
-- tendencias
-- caídas de potencia
-- incoherencias entre irradiancia y potencia
-- temperatura elevada
-- desviaciones por equipo
-- causa probable
-- impacto operacional
-- recomendación concreta de mantenimiento
+PREGUNTA:
+{question}
 
-Criterios:
-- Si la irradiancia sube o se mantiene estable y la potencia cae, es una anomalía.
-- Si un equipo se comporta peor que otros bajo condiciones similares, debe marcarse.
-- Si la temperatura supera 80°C, la criticidad debe ser crítica.
-- Prioriza por impacto en generación y riesgo operacional.
+INSTRUCCIONES:
+- Usa información específica del análisis (equipos, anomalías, criticidad)
+- No des respuestas genéricas
+- No inventes causas no mencionadas en el análisis
+- Prioriza acciones según criticidad
+- Responde como experto técnico, directo y accionable
 
-Devuelve SOLO JSON válido, sin markdown, sin explicación adicional:
-
-{{
-  "resumen": {{
-    "total_alertas": 0,
-    "criticas": 0,
-    "medias": 0,
-    "bajas": 0,
-    "riesgo_principal": "texto"
-  }},
-  "alertas": [
-    {{
-      "timestamp": "texto",
-      "equipo": "texto",
-      "criticidad": "critica/media/baja",
-      "anomalia": "texto",
-      "causa_probable": "texto",
-      "impacto": "texto",
-      "recomendacion": "texto",
-      "prioridad": 1
-    }}
-  ]
-}}
+RESPUESTA:
 """
 
     response = client.chat.completions.create(
