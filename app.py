@@ -4,6 +4,7 @@ import os
 import json
 from openai import OpenAI
 from typing import List, Dict
+from datetime import datetime
 
 app = FastAPI()
 
@@ -25,6 +26,7 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 LAST_ANALYSIS = None
 LAST_DATA = None
+LAST_UPDATED = None
 
 # =========================
 # HELPERS
@@ -192,7 +194,112 @@ RESPUESTA:
         "status": "ok",
         "respuesta": response.choices[0].message.content
     }
+# =========================
+# SHEET CHANGE TRIGGER
+# =========================
 
+@app.post("/sheet-change")
+async def sheet_change(data: List[Dict], x_bp_token: str = Header(None)):
+
+    global LAST_ANALYSIS, LAST_DATA, LAST_UPDATED
+
+    if TOKEN and x_bp_token != TOKEN:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    prompt = f"""
+Eres un sistema experto en O&M solar.
+
+Se detectó un cambio en la planilla de datos operacionales.
+
+Analiza esta serie temporal actualizada:
+
+{data}
+
+Detecta:
+- anomalías
+- caída de potencia
+- incoherencia irradiancia vs potencia
+- desviaciones por equipo
+- temperatura elevada
+- causa probable
+- impacto
+- recomendación
+
+Criterios:
+- Irradiancia estable + caída de potencia → problema interno
+- Temperatura > 80°C → crítica
+- Comparar equipos entre sí
+
+Devuelve SOLO JSON:
+
+{{
+  "resumen": {{
+    "total_alertas": 0,
+    "criticas": 0,
+    "medias": 0,
+    "bajas": 0,
+    "riesgo_principal": "texto"
+  }},
+  "alertas": [
+    {{
+      "timestamp": "texto",
+      "equipo": "texto",
+      "criticidad": "critica/media/baja",
+      "anomalia": "texto",
+      "causa_probable": "texto",
+      "impacto": "texto",
+      "recomendacion": "texto",
+      "prioridad": 1
+    }}
+  ]
+}}
+"""
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "Responde solo JSON válido."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0
+    )
+
+    result_text = response.choices[0].message.content
+
+    try:
+        result_json = json.loads(clean_json(result_text))
+    except:
+        return {"status": "error", "raw": result_text}
+
+    LAST_ANALYSIS = result_json
+    LAST_DATA = data
+    LAST_UPDATED = datetime.utcnow().isoformat()
+
+    return {
+        "status": "ok",
+        "updated": LAST_UPDATED,
+        "analysis": result_json
+    }
+# =========================
+# LAST ANALYSIS
+# =========================
+
+@app.get("/last-analysis")
+async def last_analysis():
+
+    global LAST_ANALYSIS, LAST_UPDATED
+
+    if not LAST_ANALYSIS:
+        return {
+            "status": "empty",
+            "message": "No hay análisis disponible."
+        }
+
+    return {
+        "status": "ok",
+        "updated": LAST_UPDATED,
+        "analysis": LAST_ANALYSIS
+    }
 # =========================
 # LEGACY
 # =========================
