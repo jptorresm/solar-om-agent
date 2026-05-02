@@ -43,8 +43,8 @@ from typing import List, Dict
 @app.post("/analyze")
 async def analyze(data: List[Dict], x_bp_token: str = Header(None)):
 
-    if x_bp_token != TOKEN:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+#    if x_bp_token != TOKEN:
+#        raise HTTPException(status_code=401, detail="Unauthorized")
 
     data = await request.json()
 
