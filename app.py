@@ -10,7 +10,7 @@ app = FastAPI()
 # VARIABLES DE ENTORNO
 # =========================
 
-OPENAI_API_KEY = os.getenv("Osk-proj-vuiA1O2c_sST8UAA6auifn8PFKsxFf0EtuQ3bdVRVMlIdR-tYyEZOotiSPB2blNSDaUJ5oy7XJT3BlbkFJTShjJpX-0mugP-2AKBaEL2_h9wUWX3JB3WVu5I21GftedvvXz9b0GuBLdJgoLKuycmBIF10T4A")
+OPENAI_API_KEY = os.getenv("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")
 TOKEN = os.getenv("BP_PROXY_TOKEN")
 SHEETS_WEBHOOK = os.getenv("SHEETS_WEBHOOK")
 
