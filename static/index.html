@@ -45,7 +45,6 @@ button { padding:10px; background:#38bdf8; border:none; border-radius:8px; curso
 .center { text-align:center; font-size:13px; margin-top:8px; }
 
 canvas { width:100%; height:100%; }
-
 </style>
 </head>
 
@@ -114,7 +113,7 @@ canvas { width:100%; height:100%; }
 <div class="panel chat">
   <h3>Chat experto</h3>
   <div id="chatBox" class="chat-box"></div>
-  <input id="q">
+  <input id="q" placeholder="Haz una pregunta..." />
   <button onclick="ask()">Enviar</button>
 </div>
 
@@ -131,12 +130,14 @@ let lastData=null;
 async function load(){
   const res=await fetch("/last-analysis");
   const j=await res.json();
+
   if(j.status==="ok"){
     lastAnalysis=j.analysis;
-    lastData=j.data;
-    render(j.analysis,j.data);
+    lastData=j.data || [];
+    render(j.analysis,lastData);
   }
 }
+
 setInterval(load,5000);
 load();
 
@@ -161,10 +162,7 @@ function render(a,data){
     alerts.innerHTML+=`<div class="alert ${c}">${x.equipo} → ${x.anomalia}</div>`;
   });
 
-  // PIE
   drawPie(a,data);
-
-  // TENDENCIA
   drawTrend(data);
 
   // PREVENTIVO
@@ -177,66 +175,108 @@ function render(a,data){
 }
 
 function drawPie(a,data){
-  const ctx=pie.getContext("2d");
+  const canvas=document.getElementById("pie");
+  const ctx=canvas.getContext("2d");
+
+  const size=250;
+  canvas.width=size;
+  canvas.height=size;
+
+  ctx.clearRect(0,0,size,size);
+
+  if(!data.length) return;
 
   const equipos=[...new Set(data.map(x=>x.equipo))];
   const conAlerta=[...new Set(a.alertas.map(x=>x.equipo))];
 
   const ok=equipos.length-conAlerta.length;
   const bad=conAlerta.length;
+  const total=ok+bad||1;
 
-  const total=ok+bad;
-
-  let start=0;
-
-  ctx.clearRect(0,0,300,300);
+  let start=-Math.PI/2;
 
   [ok,bad].forEach((v,i)=>{
     const angle=(v/total)*2*Math.PI;
+
     ctx.beginPath();
-    ctx.moveTo(150,150);
-    ctx.arc(150,150,100,start,start+angle);
+    ctx.moveTo(125,125);
+    ctx.arc(125,125,90,start,start+angle);
     ctx.fillStyle=i===0?"#22c55e":"#ef4444";
     ctx.fill();
+
     start+=angle;
   });
 }
 
 function drawTrend(data){
-  const ctx=trendChart.getContext("2d");
 
-  ctx.clearRect(0,0,800,260);
+  const canvas=document.getElementById("trendChart");
+  const ctx=canvas.getContext("2d");
 
-  const pot=data.map(x=>x.potencia);
-  const irr=data.map(x=>x.irradiancia);
+  const w=canvas.parentElement.clientWidth;
+  const h=260;
 
-  const max=Math.max(...pot,...irr);
+  canvas.width=w;
+  canvas.height=h;
 
-  function line(arr,color){
-    ctx.beginPath();
-    arr.forEach((v,i)=>{
-      const x=i*(700/(arr.length-1))+50;
-      const y=250-(v/max)*200;
-      if(i===0) ctx.moveTo(x,y);
-      else ctx.lineTo(x,y);
-    });
-    ctx.strokeStyle=color;
-    ctx.stroke();
-  }
+  ctx.clearRect(0,0,w,h);
 
-  line(pot,"#38bdf8");
-  line(irr,"#facc15");
+  if(!data.length) return;
+
+  const values=data.map(x=>x.corriente || x.potencia || 0);
+  const max=Math.max(...values,1);
+
+  ctx.beginPath();
+  values.forEach((v,i)=>{
+    const x=i*(w/(values.length-1));
+    const y=h-(v/max)*h;
+    if(i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  });
+
+  ctx.strokeStyle="#38bdf8";
+  ctx.stroke();
 }
 
 async function ask(){
+
+  const input=document.getElementById("q");
+  const question=input.value.trim();
+
+  if(!question) return;
+
+  if(!lastAnalysis){
+    addMsg("Primero ejecuta análisis","bot");
+    return;
+  }
+
+  addMsg(question,"user");
+  input.value="";
+
   const res=await fetch("/chat",{
     method:"POST",
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({question:q.value,analysis:lastAnalysis})
+    body:JSON.stringify({question:question,analysis:lastAnalysis})
   });
+
   const j=await res.json();
-  chatBox.innerHTML+=`<div class="msg bot">${j.respuesta}</div>`;
+
+  addMsg(j.respuesta || "Error","bot");
 }
+
+function addMsg(text,type){
+  const box=document.getElementById("chatBox");
+  box.innerHTML+=`<div class="msg ${type}">${text}</div>`;
+  box.scrollTop=box.scrollHeight;
+}
+
+// ENTER
+document.getElementById("q").addEventListener("keydown",function(e){
+  if(e.key==="Enter"){
+    e.preventDefault();
+    ask();
+  }
+});
 
 </script>
 </body>
