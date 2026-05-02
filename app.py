@@ -93,8 +93,17 @@ Devuelve SOLO JSON:
         temperature=0
     )
 
-    result_text = response.choices[0].message.content
+import json
 
+result_text = response.choices[0].message.content
+
+try:
+    result_json = json.loads(result_text)
+except:
+    return {
+        "status": "error",
+        "raw": result_text
+    }
     global LAST_ANALYSIS
     LAST_ANALYSIS = {
         "data": data,
@@ -103,7 +112,7 @@ Devuelve SOLO JSON:
 
     return {
         "status": "ok",
-        "analysis": result_text
+        "analysis": result_json
     }
 
 # =========================
