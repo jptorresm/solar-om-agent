@@ -6,278 +6,757 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body { margin:0; font-family:Arial; background:#0b1120; color:#e5e7eb; }
-.page { max-width:1400px; margin:auto; padding:20px; }
+* { box-sizing: border-box; }
 
-.header { display:flex; justify-content:space-between; margin-bottom:20px; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0b1120;
+  color: #e5e7eb;
+}
 
-.main { display:grid; grid-template-columns:2fr 1fr; gap:20px; }
+.page {
+  max-width: 1450px;
+  margin: auto;
+  padding: 24px;
+}
 
-.panel { background:#111827; padding:16px; border-radius:12px; margin-bottom:15px; }
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
 
-.kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-.kpi { padding:12px; border-radius:10px; background:#172033; }
-.kpi.blue { border-left:6px solid #38bdf8; }
-.kpi.red { border-left:6px solid #ef4444; }
-.kpi.yellow { border-left:6px solid #f59e0b; }
-.kpi.green { border-left:6px solid #22c55e; }
+h1 {
+  margin: 0;
+  font-size: 32px;
+}
 
-.chart { height:260px; }
+.subtitle {
+  margin-top: 8px;
+  color: #94a3b8;
+}
 
-.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.source-pill {
+  background: #052e16;
+  color: #bbf7d0;
+  border: 1px solid #16a34a;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+}
 
-.alert { padding:10px; border-radius:10px; margin-bottom:8px; }
-.red { background:#7f1d1d; }
-.yellow { background:#78350f; }
-.green { background:#14532d; }
+.main {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(390px, 1fr);
+  gap: 18px;
+}
 
-.chat { display:flex; flex-direction:column; height:520px; }
-.chat-box { flex:1; overflow:auto; background:#020617; padding:10px; border-radius:10px; }
+.panel {
+  background: #111827;
+  border: 1px solid #263244;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
 
-.msg { margin:5px 0; padding:8px; border-radius:10px; }
-.user { background:#075985; margin-left:auto; }
-.bot { background:#1e293b; }
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
 
-input { width:100%; padding:10px; margin-top:10px; background:#020617; color:white; border:1px solid #334155; }
+.kpi {
+  background: #172033;
+  border-radius: 14px;
+  padding: 15px;
+  border: 1px solid #2f3b52;
+}
 
-button { padding:10px; background:#38bdf8; border:none; border-radius:8px; cursor:pointer; }
+.kpi.blue { border-left: 6px solid #38bdf8; }
+.kpi.red { border-left: 6px solid #ef4444; }
+.kpi.yellow { border-left: 6px solid #f59e0b; }
+.kpi.green { border-left: 6px solid #22c55e; }
 
-.center { text-align:center; font-size:13px; margin-top:8px; }
+.kpi-label {
+  color: #94a3b8;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
 
-canvas { width:100%; height:100%; }
+.kpi-value {
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.section-title {
+  font-size: 19px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.muted {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.status-card,
+.alert-card {
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  line-height: 1.45;
+  border: 1px solid #334155;
+}
+
+.ok {
+  background: rgba(20, 83, 45, 0.55);
+  border-left: 7px solid #22c55e;
+}
+
+.low {
+  background: rgba(20, 83, 45, 0.55);
+  border-left: 7px solid #22c55e;
+}
+
+.medium {
+  background: rgba(120, 53, 15, 0.55);
+  border-left: 7px solid #f59e0b;
+}
+
+.high {
+  background: rgba(127, 29, 29, 0.62);
+  border-left: 7px solid #ef4444;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  margin-right: 6px;
+}
+
+.badge.ok { background: #22c55e; color: #052e16; }
+.badge.low { background: #22c55e; color: #052e16; }
+.badge.medium { background: #f59e0b; color: #111827; }
+.badge.high { background: #ef4444; color: white; }
+
+.score-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 42px;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.score-track {
+  background: #020617;
+  border: 1px solid #334155;
+  height: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.score-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.score-fill.high { background: #ef4444; }
+.score-fill.medium { background: #f59e0b; }
+.score-fill.low { background: #22c55e; }
+
+.chat-panel {
+  height: 520px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-box {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: #020617;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.msg {
+  max-width: 92%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  white-space: pre-wrap;
+  line-height: 1.45;
+}
+
+.msg.user {
+  background: #075985;
+  margin-left: auto;
+}
+
+.msg.bot {
+  background: #1e293b;
+  margin-right: auto;
+}
+
+.chat-row {
+  display: flex;
+  gap: 8px;
+}
+
+input {
+  flex: 1;
+  background: #020617;
+  color: #e5e7eb;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 11px;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  background: #38bdf8;
+  color: #020617;
+  font-weight: 800;
+  padding: 11px 15px;
+  cursor: pointer;
+}
+
+button:hover { background: #7dd3fc; }
+
+button.secondary {
+  background: #334155;
+  color: #e5e7eb;
+}
+
+button.green {
+  background: #22c55e;
+  color: #052e16;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 170px;
+  background: #020617;
+  color: #dbeafe;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 12px;
+  font-family: monospace;
+  resize: vertical;
+}
+
+.manual-box {
+  display: none;
+  margin-top: 14px;
+}
+
+.manual-box.open {
+  display: block;
+}
+
+.right-col {
+  position: sticky;
+  top: 20px;
+}
+
+@media (max-width: 1100px) {
+  .main { grid-template-columns: 1fr; }
+  .right-col { position: static; }
+}
+
+@media (max-width: 800px) {
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .grid2 { grid-template-columns: 1fr; }
+  .chat-row { flex-direction: column; }
+}
 </style>
 </head>
 
 <body>
 <div class="page">
 
-<div class="header">
-  <div>
-    <h2>Solar O&M Agent</h2>
-    <div>Diagnóstico automático</div>
-  </div>
-</div>
-
-<div class="main">
-
-<!-- LEFT -->
-<div>
-
-<div class="kpis">
-  <div class="kpi blue">Total<br><b id="kpiTotal">-</b></div>
-  <div class="kpi red">Críticas<br><b id="kpiCrit">-</b></div>
-  <div class="kpi yellow">Medias<br><b id="kpiMed">-</b></div>
-  <div class="kpi green">Bajas<br><b id="kpiLow">-</b></div>
-</div>
-
-<div class="panel">
-  <h3>Tendencia operacional</h3>
-  <canvas id="trendChart" class="chart"></canvas>
-</div>
-
-<div class="grid2">
-
-  <div class="panel">
-    <h3>Estado de equipos</h3>
-    <canvas id="pie"></canvas>
-    <div class="center">OK vs con alerta</div>
+  <div class="header">
+    <div>
+      <h1>Solar O&M Agent</h1>
+      <div class="subtitle">Diagnóstico operacional, priorización y análisis preventivo</div>
+    </div>
+    <div id="sourcePill" class="source-pill">Fuente principal: Google Sheets</div>
   </div>
 
-  <div class="panel">
-    <h3>Diagnóstico general</h3>
-    <div id="diagnosis"></div>
+  <div class="main">
+
+    <div>
+      <div class="kpis">
+        <div class="kpi blue">
+          <div class="kpi-label">Alertas totales</div>
+          <div id="kpiTotal" class="kpi-value">-</div>
+        </div>
+        <div class="kpi red">
+          <div class="kpi-label">Críticas</div>
+          <div id="kpiCriticas" class="kpi-value">-</div>
+        </div>
+        <div class="kpi yellow">
+          <div class="kpi-label">Medias</div>
+          <div id="kpiMedias" class="kpi-value">-</div>
+        </div>
+        <div class="kpi green">
+          <div class="kpi-label">Bajas</div>
+          <div id="kpiBajas" class="kpi-value">-</div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="panel">
+          <div class="section-title">Estado por equipo</div>
+          <div id="equipmentStatus">
+            <div class="muted">Esperando datos.</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">Diagnóstico general</div>
+          <div id="diagnosis">
+            <div class="muted">Aún no hay análisis ejecutado.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="panel">
+          <div class="section-title">Ranking de criticidad</div>
+          <div id="ranking">
+            <div class="muted">Esperando análisis.</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">Análisis preventivo</div>
+          <div id="preventive">
+            <div class="muted">Sin señales preventivas cargadas.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title">Alertas priorizadas</div>
+        <div id="alerts">
+          <div class="muted">Sin alertas todavía.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div class="panel">
+        <div class="section-title">Fuente de datos</div>
+        <div class="muted">Google Sheets con actualización automática. Modo manual disponible para pruebas.</div>
+
+        <div class="actions">
+          <button class="green" onclick="loadFromSheets(true)">Actualizar desde Sheets</button>
+          <button class="secondary" onclick="toggleManual()">Modo manual</button>
+          <button class="secondary" onclick="clearDashboard()">Limpiar</button>
+        </div>
+
+        <div id="manualBox" class="manual-box">
+          <div class="muted" style="margin:12px 0 8px;">JSON manual para pruebas.</div>
+          <textarea id="dataInput">[
+  {"timestamp":"2026-05-02 10:00","equipo":"S01","corriente":85},
+  {"timestamp":"2026-05-02 10:00","equipo":"S02","corriente":84},
+  {"timestamp":"2026-05-02 10:00","equipo":"S03","corriente":0},
+  {"timestamp":"2026-05-02 10:00","equipo":"S04","corriente":87},
+  {"timestamp":"2026-05-02 10:00","equipo":"S05","corriente":86},
+  {"timestamp":"2026-05-02 10:00","equipo":"S12","corriente":110}
+]</textarea>
+          <div class="actions">
+            <button onclick="analyzeManual()">Analizar manual</button>
+          </div>
+        </div>
+
+        <div id="statusText" class="muted" style="margin-top:12px;">Listo.</div>
+      </div>
+
+      <div class="panel chat-panel">
+        <div class="section-title">Chat experto O&M</div>
+        <div id="chatBox" class="chat-box">
+          <div class="msg bot">Cuando exista un análisis, puedes preguntar por equipos críticos, acciones, causa probable o prioridad.</div>
+        </div>
+
+        <div class="chat-row">
+          <input id="q" placeholder="Haz una pregunta..." />
+          <button onclick="ask()">Enviar</button>
+        </div>
+      </div>
+    </div>
+
   </div>
-
-</div>
-
-<div class="panel">
-  <h3>Análisis preventivo</h3>
-  <div id="trends"></div>
-</div>
-
-<div class="panel">
-  <h3>Alertas</h3>
-  <div id="alerts"></div>
-</div>
-
-</div>
-
-<!-- RIGHT -->
-<div>
-
-<div class="panel">
-  <h3>Fuente de datos</h3>
-  Google Sheets / Manual
-</div>
-
-<div class="panel chat">
-  <h3>Chat experto</h3>
-  <div id="chatBox" class="chat-box"></div>
-  <input id="q" placeholder="Haz una pregunta..." />
-  <button onclick="ask()">Enviar</button>
-</div>
-
-</div>
-
-</div>
 </div>
 
 <script>
+let lastAnalysis = null;
+let lastData = null;
+let lastUpdated = null;
 
-let lastAnalysis=null;
-let lastData=null;
+function setStatus(text) {
+  document.getElementById("statusText").innerText = text;
+}
 
-async function load(){
-  const res=await fetch("/last-analysis");
-  const j=await res.json();
+function toggleManual() {
+  document.getElementById("manualBox").classList.toggle("open");
+}
 
-  if(j.status==="ok"){
-    lastAnalysis=j.analysis;
-    lastData=j.data || [];
-    render(j.analysis,lastData);
+function normalizeCriticidad(v) {
+  const s = String(v || "").toLowerCase();
+  if (s.includes("crit")) return "high";
+  if (s.includes("med")) return "medium";
+  return "low";
+}
+
+function labelCriticidad(cls) {
+  if (cls === "high") return "Crítica";
+  if (cls === "medium") return "Media";
+  return "Baja";
+}
+
+async function loadFromSheets(force = false) {
+  try {
+    const res = await fetch("/last-analysis");
+    const json = await res.json();
+
+    if (json.status !== "ok") {
+      if (force) setStatus("No hay análisis disponible desde Sheets.");
+      return;
+    }
+
+    if (force || json.updated !== lastUpdated) {
+      lastUpdated = json.updated || new Date().toISOString();
+      lastAnalysis = json.analysis;
+      lastData = json.data || [];
+
+      renderDashboard(lastAnalysis, lastData);
+
+      if (force) {
+        addMsg("Análisis cargado desde Google Sheets.", "bot");
+      } else {
+        addMsg("Análisis actualizado automáticamente desde Google Sheets.", "bot");
+      }
+
+      setStatus("Actualizado desde Sheets" + (json.updated ? " · " + json.updated : ""));
+    }
+  } catch (e) {
+    setStatus("Error consultando /last-analysis.");
   }
 }
 
-setInterval(load,5000);
-load();
+setInterval(() => loadFromSheets(false), 5000);
+loadFromSheets(true);
 
-function render(a,data){
+async function analyzeManual() {
+  try {
+    const data = JSON.parse(document.getElementById("dataInput").value);
 
-  const r=a.resumen;
+    if (!Array.isArray(data)) {
+      alert("El JSON debe ser una lista.");
+      return;
+    }
 
-  kpiTotal.innerText=r.total_alertas;
-  kpiCrit.innerText=r.criticas;
-  kpiMed.innerText=r.medias;
-  kpiLow.innerText=r.bajas;
+    const res = await fetch("/analyze", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(data)
+    });
 
-  diagnosis.innerHTML=r.riesgo_principal;
+    const json = await res.json();
 
-  // ALERTAS
-  alerts.innerHTML="";
-  a.alertas.forEach(x=>{
-    let c="green";
-    if(x.criticidad.includes("crit")) c="red";
-    else if(x.criticidad.includes("med")) c="yellow";
+    if (json.status !== "ok") {
+      alert(JSON.stringify(json, null, 2));
+      return;
+    }
 
-    alerts.innerHTML+=`<div class="alert ${c}">${x.equipo} → ${x.anomalia}</div>`;
-  });
+    lastAnalysis = json.analysis;
+    lastData = data;
+    lastUpdated = new Date().toISOString();
 
-  drawPie(a,data);
-  drawTrend(data);
-
-  // PREVENTIVO
-  let html="";
-  (a.tendencias||[]).forEach(t=>{
-    html+=`<div class="alert yellow">${t.equipo} → ${t.detalle}</div>`;
-  });
-  trends.innerHTML=html||"Sin señales";
-
+    document.getElementById("sourcePill").innerText = "Fuente actual: JSON manual";
+    renderDashboard(lastAnalysis, lastData);
+    addMsg("Análisis manual ejecutado correctamente.", "bot");
+    setStatus("Análisis manual completado.");
+  } catch (e) {
+    alert("Error en análisis manual: " + e.message);
+  }
 }
 
-function drawPie(a,data){
-  const canvas=document.getElementById("pie");
-  const ctx=canvas.getContext("2d");
+function renderDashboard(analysis, data) {
+  const resumen = analysis.resumen || {};
+  const alertas = analysis.alertas || [];
 
-  const size=250;
-  canvas.width=size;
-  canvas.height=size;
+  const criticas = resumen.criticas ?? alertas.filter(a => normalizeCriticidad(a.criticidad) === "high").length;
+  const medias = resumen.medias ?? alertas.filter(a => normalizeCriticidad(a.criticidad) === "medium").length;
+  const bajas = resumen.bajas ?? alertas.filter(a => normalizeCriticidad(a.criticidad) === "low").length;
+  const total = resumen.total_alertas ?? alertas.length;
 
-  ctx.clearRect(0,0,size,size);
+  document.getElementById("kpiTotal").innerText = total;
+  document.getElementById("kpiCriticas").innerText = criticas;
+  document.getElementById("kpiMedias").innerText = medias;
+  document.getElementById("kpiBajas").innerText = bajas;
 
-  if(!data.length) return;
-
-  const equipos=[...new Set(data.map(x=>x.equipo))];
-  const conAlerta=[...new Set(a.alertas.map(x=>x.equipo))];
-
-  const ok=equipos.length-conAlerta.length;
-  const bad=conAlerta.length;
-  const total=ok+bad||1;
-
-  let start=-Math.PI/2;
-
-  [ok,bad].forEach((v,i)=>{
-    const angle=(v/total)*2*Math.PI;
-
-    ctx.beginPath();
-    ctx.moveTo(125,125);
-    ctx.arc(125,125,90,start,start+angle);
-    ctx.fillStyle=i===0?"#22c55e":"#ef4444";
-    ctx.fill();
-
-    start+=angle;
-  });
+  renderDiagnosis(resumen, total, criticas, medias);
+  renderEquipmentStatus(data, alertas);
+  renderRanking(alertas);
+  renderPreventive(analysis.tendencias || []);
+  renderAlerts(alertas);
 }
 
-function drawTrend(data){
+function renderDiagnosis(resumen, total, criticas, medias) {
+  let estado = "Operación sin criticidad alta detectada.";
+  let accion = "Mantener monitoreo.";
 
-  const canvas=document.getElementById("trendChart");
-  const ctx=canvas.getContext("2d");
+  if (criticas > 0) {
+    estado = "Requiere atención prioritaria.";
+    accion = "Atender primero los equipos con alerta crítica.";
+  } else if (medias > 0) {
+    estado = "Operación con desviaciones relevantes.";
+    accion = "Programar revisión preventiva.";
+  }
 
-  const w=canvas.parentElement.clientWidth;
-  const h=260;
-
-  canvas.width=w;
-  canvas.height=h;
-
-  ctx.clearRect(0,0,w,h);
-
-  if(!data.length) return;
-
-  const values=data.map(x=>x.corriente || x.potencia || 0);
-  const max=Math.max(...values,1);
-
-  ctx.beginPath();
-  values.forEach((v,i)=>{
-    const x=i*(w/(values.length-1));
-    const y=h-(v/max)*h;
-    if(i===0) ctx.moveTo(x,y);
-    else ctx.lineTo(x,y);
-  });
-
-  ctx.strokeStyle="#38bdf8";
-  ctx.stroke();
+  document.getElementById("diagnosis").innerHTML = `
+    <div><strong>Riesgo principal:</strong> ${resumen.riesgo_principal || "-"}</div><br>
+    <div><strong>Estado:</strong> ${estado}</div>
+    <div><strong>Alertas detectadas:</strong> ${total}</div>
+    <div><strong>Acción sugerida:</strong> ${accion}</div>
+  `;
 }
 
-async function ask(){
+function renderEquipmentStatus(data, alertas) {
+  const el = document.getElementById("equipmentStatus");
+  const equipos = [...new Set((data || []).map(d => d.equipo || d.Equipo).filter(Boolean))];
 
-  const input=document.getElementById("q");
-  const question=input.value.trim();
-
-  if(!question) return;
-
-  if(!lastAnalysis){
-    addMsg("Primero ejecuta análisis","bot");
+  if (!equipos.length) {
+    el.innerHTML = `<div class="muted">No hay equipos identificados en los datos.</div>`;
     return;
   }
 
-  addMsg(question,"user");
-  input.value="";
-
-  const res=await fetch("/chat",{
-    method:"POST",
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({question:question,analysis:lastAnalysis})
+  const alertasPorEquipo = {};
+  alertas.forEach(a => {
+    const eq = a.equipo || a.Equipo;
+    if (!eq) return;
+    const cls = normalizeCriticidad(a.criticidad);
+    if (!alertasPorEquipo[eq]) alertasPorEquipo[eq] = [];
+    alertasPorEquipo[eq].push(cls);
   });
 
-  const j=await res.json();
+  let html = "";
 
-  addMsg(j.respuesta || "Error","bot");
+  equipos.forEach(eq => {
+    const arr = alertasPorEquipo[eq] || [];
+    let cls = "ok";
+    let label = "OK";
+
+    if (arr.includes("high")) {
+      cls = "high";
+      label = "Crítica";
+    } else if (arr.includes("medium")) {
+      cls = "medium";
+      label = "Media";
+    } else if (arr.includes("low")) {
+      cls = "low";
+      label = "Baja";
+    }
+
+    const rows = (data || []).filter(d => (d.equipo || d.Equipo) === eq);
+    const latest = rows[rows.length - 1] || {};
+    const corriente = latest.corriente ?? latest.Corriente ?? null;
+    const potencia = latest.potencia ?? latest.Potencia ?? null;
+
+    html += `
+      <div class="status-card ${cls}">
+        <span class="badge ${cls}">${label}</span>
+        <strong>${eq}</strong><br>
+        <span class="muted">
+          ${corriente !== null ? "Corriente: " + corriente + " A" : ""}
+          ${potencia !== null ? " Potencia: " + potencia : ""}
+        </span>
+      </div>
+    `;
+  });
+
+  el.innerHTML = html;
 }
 
-function addMsg(text,type){
-  const box=document.getElementById("chatBox");
-  box.innerHTML+=`<div class="msg ${type}">${text}</div>`;
-  box.scrollTop=box.scrollHeight;
+function renderRanking(alertas) {
+  const el = document.getElementById("ranking");
+
+  if (!alertas.length) {
+    el.innerHTML = `<div class="muted">Sin criticidad registrada.</div>`;
+    return;
+  }
+
+  const scoreByEq = {};
+
+  alertas.forEach(a => {
+    const eq = a.equipo || "Sin equipo";
+    const cls = normalizeCriticidad(a.criticidad);
+    const score = cls === "high" ? 100 : cls === "medium" ? 60 : 30;
+
+    if (!scoreByEq[eq]) scoreByEq[eq] = 0;
+    scoreByEq[eq] += score;
+  });
+
+  const rows = Object.entries(scoreByEq)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+
+  const max = Math.max(...rows.map(r => r[1]), 1);
+
+  el.innerHTML = rows.map(([eq, score]) => {
+    const cls = score >= 100 ? "high" : score >= 60 ? "medium" : "low";
+    return `
+      <div class="score-row">
+        <strong>${eq}</strong>
+        <div class="score-track">
+          <div class="score-fill ${cls}" style="width:${(score / max) * 100}%"></div>
+        </div>
+        <span>${score}</span>
+      </div>
+    `;
+  }).join("");
 }
 
-// ENTER
-document.getElementById("q").addEventListener("keydown",function(e){
-  if(e.key==="Enter"){
+function renderPreventive(tendencias) {
+  const el = document.getElementById("preventive");
+
+  if (!tendencias.length) {
+    el.innerHTML = `<div class="muted">Sin señales preventivas detectadas.</div>`;
+    return;
+  }
+
+  el.innerHTML = tendencias.map(t => {
+    const cls = normalizeCriticidad(t.criticidad || "media");
+    return `
+      <div class="alert-card ${cls}">
+        <span class="badge ${cls}">${labelCriticidad(cls)}</span>
+        <strong>${t.equipo || "Equipo"}</strong><br>
+        ${t.detalle || t.descripcion || t.tipo || "-"}
+      </div>
+    `;
+  }).join("");
+}
+
+function renderAlerts(alertas) {
+  const el = document.getElementById("alerts");
+
+  if (!alertas.length) {
+    el.innerHTML = `<div class="muted">No se detectaron alertas.</div>`;
+    return;
+  }
+
+  const sorted = [...alertas].sort((a, b) => (a.prioridad || 99) - (b.prioridad || 99));
+
+  el.innerHTML = sorted.map(a => {
+    const cls = normalizeCriticidad(a.criticidad);
+    return `
+      <div class="alert-card ${cls}">
+        <span class="badge ${cls}">${labelCriticidad(cls)}</span>
+        <strong>${a.equipo || "Equipo no indicado"}</strong>
+        <span class="muted"> Prioridad ${a.prioridad || "-"}</span><br><br>
+        <strong>Anomalía:</strong> ${a.anomalia || "-"}<br>
+        <strong>Causa probable:</strong> ${a.causa_probable || "-"}<br>
+        <strong>Impacto:</strong> ${a.impacto || "-"}<br>
+        <strong>Recomendación:</strong> ${a.recomendacion || "-"}
+      </div>
+    `;
+  }).join("");
+}
+
+async function ask() {
+  const input = document.getElementById("q");
+  const question = input.value.trim();
+
+  if (!question) return;
+
+  if (!lastAnalysis) {
+    addMsg("Primero debe existir un análisis cargado.", "bot");
+    return;
+  }
+
+  addMsg(question, "user");
+  input.value = "";
+
+  try {
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        question,
+        analysis: lastAnalysis
+      })
+    });
+
+    const json = await res.json();
+    addMsg(json.respuesta || json.message || "No se pudo responder.", "bot");
+  } catch (e) {
+    addMsg("Error conectando con /chat.", "bot");
+  }
+}
+
+function addMsg(text, type) {
+  const box = document.getElementById("chatBox");
+  box.innerHTML += `<div class="msg ${type}">${escapeHtml(text)}</div>`;
+  box.scrollTop = box.scrollHeight;
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function clearDashboard() {
+  lastAnalysis = null;
+  lastData = null;
+  lastUpdated = null;
+
+  document.getElementById("kpiTotal").innerText = "-";
+  document.getElementById("kpiCriticas").innerText = "-";
+  document.getElementById("kpiMedias").innerText = "-";
+  document.getElementById("kpiBajas").innerText = "-";
+  document.getElementById("diagnosis").innerHTML = `<div class="muted">Aún no hay análisis ejecutado.</div>`;
+  document.getElementById("equipmentStatus").innerHTML = `<div class="muted">Esperando datos.</div>`;
+  document.getElementById("ranking").innerHTML = `<div class="muted">Esperando análisis.</div>`;
+  document.getElementById("preventive").innerHTML = `<div class="muted">Sin señales preventivas cargadas.</div>`;
+  document.getElementById("alerts").innerHTML = `<div class="muted">Sin alertas todavía.</div>`;
+  document.getElementById("chatBox").innerHTML = `<div class="msg bot">Dashboard limpiado.</div>`;
+  setStatus("Dashboard limpiado.");
+}
+
+document.getElementById("q").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
     e.preventDefault();
     ask();
   }
 });
-
 </script>
 </body>
 </html>
