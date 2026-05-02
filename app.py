@@ -46,7 +46,6 @@ async def analyze(data: List[Dict], x_bp_token: str = Header(None)):
 #    if x_bp_token != TOKEN:
 #        raise HTTPException(status_code=401, detail="Unauthorized")
 
-    data = await request.json()
 
     prompt = f"""
 Eres un ingeniero experto en O&M solar.
