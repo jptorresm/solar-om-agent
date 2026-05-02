@@ -1,1020 +1,243 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Solar O&M Agent</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<title>Solar O&M Agent</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    * { box-sizing: border-box; }
+<style>
+body { margin:0; font-family:Arial; background:#0b1120; color:#e5e7eb; }
+.page { max-width:1400px; margin:auto; padding:20px; }
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0b1120;
-      color: #e5e7eb;
-    }
+.header { display:flex; justify-content:space-between; margin-bottom:20px; }
 
-    .page {
-      max-width: 1460px;
-      margin: 0 auto;
-      padding: 24px;
-    }
+.main { display:grid; grid-template-columns:2fr 1fr; gap:20px; }
 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: flex-start;
-      margin-bottom: 22px;
-    }
+.panel { background:#111827; padding:16px; border-radius:12px; margin-bottom:15px; }
 
-    h1 {
-      margin: 0;
-      font-size: 34px;
-      letter-spacing: -0.5px;
-    }
+.kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.kpi { padding:12px; border-radius:10px; background:#172033; }
+.kpi.blue { border-left:6px solid #38bdf8; }
+.kpi.red { border-left:6px solid #ef4444; }
+.kpi.yellow { border-left:6px solid #f59e0b; }
+.kpi.green { border-left:6px solid #22c55e; }
 
-    .subtitle {
-      margin-top: 8px;
-      color: #94a3b8;
-      font-size: 15px;
-    }
+.chart { height:260px; }
 
-    .source-pill {
-      background: #052e16;
-      border: 1px solid #16a34a;
-      color: #bbf7d0;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-      white-space: nowrap;
-    }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
 
-    .main-layout {
-      display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(390px, 1fr);
-      gap: 18px;
-      align-items: start;
-    }
+.alert { padding:10px; border-radius:10px; margin-bottom:8px; }
+.red { background:#7f1d1d; }
+.yellow { background:#78350f; }
+.green { background:#14532d; }
 
-    .left-column, .right-column { min-width: 0; }
+.chat { display:flex; flex-direction:column; height:520px; }
+.chat-box { flex:1; overflow:auto; background:#020617; padding:10px; border-radius:10px; }
 
-    .right-column {
-      position: sticky;
-      top: 20px;
-    }
+.msg { margin:5px 0; padding:8px; border-radius:10px; }
+.user { background:#075985; margin-left:auto; }
+.bot { background:#1e293b; }
 
-    .panel {
-      background: #111827;
-      border: 1px solid #263244;
-      border-radius: 18px;
-      padding: 18px;
-      margin-bottom: 18px;
-      box-shadow: 0 10px 28px rgba(0,0,0,.18);
-    }
+input { width:100%; padding:10px; margin-top:10px; background:#020617; color:white; border:1px solid #334155; }
 
-    .section-title {
-      font-size: 19px;
-      font-weight: 800;
-      margin-bottom: 12px;
-    }
+button { padding:10px; background:#38bdf8; border:none; border-radius:8px; cursor:pointer; }
 
-    .muted {
-      color: #94a3b8;
-      font-size: 13px;
-      line-height: 1.35;
-    }
+.center { text-align:center; font-size:13px; margin-top:8px; }
 
-    .kpis {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      margin-bottom: 18px;
-    }
+canvas { width:100%; height:100%; }
 
-    .kpi {
-      background: #172033;
-      border: 1px solid #2f3b52;
-      border-radius: 16px;
-      padding: 16px;
-      min-height: 92px;
-    }
-
-    .kpi.total { border-left: 6px solid #38bdf8; }
-    .kpi.critica { border-left: 6px solid #ef4444; }
-    .kpi.media { border-left: 6px solid #f59e0b; }
-    .kpi.baja { border-left: 6px solid #22c55e; }
-
-    .kpi-label {
-      color: #94a3b8;
-      font-size: 13px;
-      margin-bottom: 8px;
-    }
-
-    .kpi-value {
-      font-size: 32px;
-      font-weight: 800;
-      line-height: 1;
-    }
-
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.35fr) minmax(320px, .75fr);
-      gap: 18px;
-    }
-
-    .chart-wrap {
-      background: #020617;
-      border: 1px solid #334155;
-      border-radius: 14px;
-      padding: 14px;
-      height: 300px;
-    }
-
-    canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    .bars {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 6px;
-    }
-
-    .bar-row {
-      display: grid;
-      grid-template-columns: 80px 1fr 34px;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: #cbd5e1;
-    }
-
-    .bar-track {
-      height: 14px;
-      background: #020617;
-      border-radius: 999px;
-      overflow: hidden;
-      border: 1px solid #334155;
-    }
-
-    .bar-fill {
-      height: 100%;
-      width: 0%;
-      border-radius: 999px;
-      transition: width .25s ease;
-    }
-
-    .bar-fill.red { background: #ef4444; }
-    .bar-fill.yellow { background: #f59e0b; }
-    .bar-fill.green { background: #22c55e; }
-
-    .diagnosis {
-      line-height: 1.55;
-      color: #dbeafe;
-      font-size: 15px;
-    }
-
-    .alerts {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .alert-card {
-      border-radius: 14px;
-      padding: 14px;
-      border: 1px solid #2f3b52;
-      line-height: 1.45;
-    }
-
-    .alert-card.critica {
-      background: rgba(127, 29, 29, 0.42);
-      border-color: #ef4444;
-      border-left: 8px solid #ef4444;
-    }
-
-    .alert-card.media {
-      background: rgba(120, 53, 15, 0.42);
-      border-color: #f59e0b;
-      border-left: 8px solid #f59e0b;
-    }
-
-    .alert-card.baja {
-      background: rgba(20, 83, 45, 0.42);
-      border-color: #22c55e;
-      border-left: 8px solid #22c55e;
-    }
-
-    .alert-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
-      background: #334155;
-    }
-
-    .critica .badge { background: #ef4444; color: #fff; }
-    .media .badge { background: #f59e0b; color: #111827; }
-    .baja .badge { background: #22c55e; color: #052e16; }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-
-    button {
-      border: none;
-      border-radius: 12px;
-      padding: 12px 16px;
-      font-weight: 800;
-      cursor: pointer;
-      background: #38bdf8;
-      color: #020617;
-    }
-
-    button:hover { background: #7dd3fc; }
-
-    button.secondary {
-      background: #334155;
-      color: #e5e7eb;
-    }
-
-    button.green {
-      background: #22c55e;
-      color: #052e16;
-    }
-
-    button.green:hover { background: #86efac; }
-
-    textarea {
-      width: 100%;
-      min-height: 190px;
-      resize: vertical;
-      background: #020617;
-      color: #dbeafe;
-      border: 1px solid #334155;
-      border-radius: 14px;
-      padding: 14px;
-      font-family: monospace;
-      font-size: 13px;
-      outline: none;
-    }
-
-    .manual-box {
-      margin-top: 14px;
-      display: none;
-    }
-
-    .manual-box.open { display: block; }
-
-    .status {
-      margin-top: 10px;
-      color: #94a3b8;
-      font-size: 13px;
-    }
-
-    .chat-panel {
-      height: calc(100vh - 48px);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .chat-box {
-      flex: 1;
-      min-height: 430px;
-      overflow-y: auto;
-      background: #020617;
-      border: 1px solid #334155;
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 12px;
-    }
-
-    .msg {
-      max-width: 92%;
-      padding: 11px 13px;
-      border-radius: 14px;
-      margin-bottom: 10px;
-      line-height: 1.45;
-      white-space: pre-wrap;
-    }
-
-    .msg.user {
-      margin-left: auto;
-      background: #075985;
-    }
-
-    .msg.bot {
-      margin-right: auto;
-      background: #1e293b;
-    }
-
-    .chat-row {
-      display: flex;
-      gap: 10px;
-    }
-
-    .chat-row input {
-      flex: 1;
-      background: #020617;
-      color: #e5e7eb;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 12px;
-      outline: none;
-    }
-
-    @media (max-width: 1100px) {
-      .main-layout { grid-template-columns: 1fr; }
-      .right-column { position: static; }
-      .chat-panel { height: auto; }
-      .chat-box { min-height: 320px; }
-    }
-
-    @media (max-width: 800px) {
-      .page { padding: 16px; }
-      .header { flex-direction: column; }
-      .kpis { grid-template-columns: repeat(2, 1fr); }
-      .dashboard-grid { grid-template-columns: 1fr; }
-      .msg { max-width: 100%; }
-      .chat-row { flex-direction: column; }
-    }
-  </style>
+</style>
 </head>
 
 <body>
-  <div class="page">
-    <div class="header">
-      <div>
-        <h1>Solar O&M Agent</h1>
-        <div class="subtitle">Dashboard de diagnóstico operacional con IA + chat experto O&M</div>
-      </div>
-      <div id="sourcePill" class="source-pill">Fuente principal: Google Sheets</div>
-    </div>
+<div class="page">
 
-    <div class="main-layout">
-      <div class="left-column">
-        <div class="kpis">
-          <div class="kpi total">
-            <div class="kpi-label">Alertas totales</div>
-            <div id="kpiTotal" class="kpi-value">-</div>
-          </div>
-          <div class="kpi critica">
-            <div class="kpi-label">Críticas</div>
-            <div id="kpiCriticas" class="kpi-value">-</div>
-          </div>
-          <div class="kpi media">
-            <div class="kpi-label">Medias</div>
-            <div id="kpiMedias" class="kpi-value">-</div>
-          </div>
-          <div class="kpi baja">
-            <div class="kpi-label">Bajas</div>
-            <div id="kpiBajas" class="kpi-value">-</div>
-          </div>
-        </div>
+<div class="header">
+  <div>
+    <h2>Solar O&M Agent</h2>
+    <div>Diagnóstico automático</div>
+  </div>
+</div>
 
-        <div class="dashboard-grid">
-          <div class="panel">
-            <div class="section-title">Tendencia operacional</div>
-            <div class="chart-wrap">
-              <canvas id="trendChart"></canvas>
-            </div>
-            <div class="muted">Índice visual 0–100 por variable. No mezcla escalas reales; muestra tendencia relativa por serie.</div>
-          </div>
+<div class="main">
 
-          <div class="panel">
-            <div class="section-title">Distribución de alertas</div>
-            <div id="alertBars" class="bars">
-              <div class="muted">Esperando análisis.</div>
-            </div>
-          </div>
-        </div>
+<!-- LEFT -->
+<div>
 
-        <div class="panel">
-          <div class="section-title">Diagnóstico general</div>
-          <div id="diagnosis" class="diagnosis">Aún no hay análisis ejecutado.</div>
-        </div>
+<div class="kpis">
+  <div class="kpi blue">Total<br><b id="kpiTotal">-</b></div>
+  <div class="kpi red">Críticas<br><b id="kpiCrit">-</b></div>
+  <div class="kpi yellow">Medias<br><b id="kpiMed">-</b></div>
+  <div class="kpi green">Bajas<br><b id="kpiLow">-</b></div>
+</div>
 
-        <div class="panel">
-          <div class="section-title">Análisis preventivo</div>
-          <div id="trends" class="alerts">
-            <div class="muted">Sin señales preventivas cargadas.</div>
-          </div>
-        </div>
+<div class="panel">
+  <h3>Tendencia operacional</h3>
+  <canvas id="trendChart" class="chart"></canvas>
+</div>
 
-        <div class="panel">
-          <div class="section-title">Fuente de datos</div>
-          <div class="muted">
-            Modo principal: Google Sheets con actualización automática. El modo manual queda como respaldo para pruebas y simulaciones.
-          </div>
+<div class="grid2">
 
-          <div class="actions">
-            <button class="green" onclick="checkLastAnalysis(true)">Actualizar desde Sheets</button>
-            <button class="secondary" onclick="toggleManual()">Mostrar/Ocultar modo manual</button>
-            <button class="secondary" onclick="clearDashboard()">Limpiar</button>
-          </div>
-
-          <div id="manualBox" class="manual-box">
-            <div class="muted" style="margin:12px 0 8px;">Modo manual técnico: pega o edita JSON para simular escenarios.</div>
-
-            <textarea id="dataInput">[
-  {
-    "timestamp": "2026-05-02 10:00",
-    "equipo": "INV-01",
-    "irradiancia": 850,
-    "potencia": 780,
-    "temperatura": 42
-  },
-  {
-    "timestamp": "2026-05-02 10:15",
-    "equipo": "INV-01",
-    "irradiancia": 870,
-    "potencia": 795,
-    "temperatura": 43
-  },
-  {
-    "timestamp": "2026-05-02 10:30",
-    "equipo": "INV-01",
-    "irradiancia": 890,
-    "potencia": 430,
-    "temperatura": 44
-  },
-  {
-    "timestamp": "2026-05-02 10:30",
-    "equipo": "INV-02",
-    "irradiancia": 890,
-    "potencia": 815,
-    "temperatura": 43
-  },
-  {
-    "timestamp": "2026-05-02 10:45",
-    "equipo": "INV-01",
-    "irradiancia": 900,
-    "potencia": 410,
-    "temperatura": 45
-  },
-  {
-    "timestamp": "2026-05-02 10:45",
-    "equipo": "INV-02",
-    "irradiancia": 900,
-    "potencia": 825,
-    "temperatura": 44
-  }
-]</textarea>
-
-            <div class="actions">
-              <button onclick="analyzeManual()">Analizar manual</button>
-              <button class="secondary" onclick="loadExample()">Cargar ejemplo</button>
-            </div>
-          </div>
-
-          <div id="status" class="status">Listo. Esperando análisis desde Google Sheets.</div>
-        </div>
-
-        <div class="panel">
-          <div class="section-title">Alertas priorizadas</div>
-          <div id="alerts" class="alerts">
-            <div class="muted">Sin alertas todavía.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="right-column">
-        <div class="panel chat-panel">
-          <div class="section-title">Chat experto O&M</div>
-
-          <div id="chatBox" class="chat-box">
-            <div class="msg bot">El dashboard se actualiza desde Google Sheets. Cuando exista un análisis, puedes preguntarme por causa probable, prioridad, acciones de mantenimiento o impacto operacional.</div>
-          </div>
-
-          <div class="chat-row">
-            <input id="questionInput" placeholder="Ej: ¿Cuántos equipos tienen problema?" />
-            <button onclick="sendQuestion()">Enviar</button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="panel">
+    <h3>Estado de equipos</h3>
+    <canvas id="pie"></canvas>
+    <div class="center">OK vs con alerta</div>
   </div>
 
-  <script>
-    let lastUpdated = null;
-    let lastAnalysis = null;
-    let lastData = null;
-
-    function setStatus(text) {
-      document.getElementById("status").innerText = text;
-    }
-
-    function toggleManual() {
-      document.getElementById("manualBox").classList.toggle("open");
-    }
-
-    async function checkLastAnalysis(forceMessage = false) {
-      try {
-        const res = await fetch("/last-analysis");
-        const json = await res.json();
-
-        if (json.status !== "ok") {
-          if (forceMessage) setStatus("No hay análisis disponible todavía desde Sheets.");
-          return;
-        }
-
-        if (forceMessage || (json.updated && json.updated !== lastUpdated)) {
-          lastUpdated = json.updated;
-          lastAnalysis = json.analysis;
-          lastData = json.data || lastData || getManualDataSafe();
-
-          setSourcePill("Fuente actual: Google Sheets", "sheets");
-          renderAnalysis(lastAnalysis);
-          drawTrendChart(lastData);
-
-          appendMessage(
-            forceMessage
-              ? "Análisis cargado desde Google Sheets."
-              : "Se detectó un cambio en Google Sheets y el análisis se actualizó automáticamente.",
-            "bot"
-          );
-
-          setStatus("Actualizado desde Google Sheets" + (json.updated ? " · " + json.updated : ""));
-        }
-      } catch (e) {
-        console.log("Error consultando /last-analysis", e);
-        if (forceMessage) setStatus("Error consultando /last-analysis.");
-      }
-    }
-
-    setInterval(checkLastAnalysis, 5000);
-
-    async function analyzeManual() {
-      setStatus("Analizando datos manuales...");
-      setSourcePill("Fuente actual: JSON manual", "manual");
-
-      let data;
-
-      try {
-        data = JSON.parse(document.getElementById("dataInput").value);
-      } catch (e) {
-        setStatus("Error: el JSON no es válido.");
-        alert("El JSON de datos no es válido.");
-        return;
-      }
-
-      if (!Array.isArray(data)) {
-        setStatus("Error: el JSON debe ser una lista.");
-        alert("El backend actual espera una lista directa: [ {...}, {...} ]");
-        return;
-      }
-
-      try {
-        const res = await fetch("/analyze", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
-
-        const json = await res.json();
-
-        if (json.status !== "ok") {
-          setStatus("Error en análisis manual.");
-          alert(JSON.stringify(json, null, 2));
-          return;
-        }
-
-        lastAnalysis = json.analysis;
-        lastData = data;
-        renderAnalysis(lastAnalysis);
-        drawTrendChart(lastData);
-        appendMessage("Análisis manual ejecutado correctamente. Ya puedes preguntarme sobre el diagnóstico.", "bot");
-        setStatus("Análisis manual completado.");
-      } catch (e) {
-        setStatus("Error conectando con /analyze.");
-        alert("Error conectando con /analyze: " + e.message);
-      }
-    }
-
-    function setSourcePill(text, type) {
-      const pill = document.getElementById("sourcePill");
-      pill.innerText = text;
-
-      if (type === "manual") {
-        pill.style.background = "#1e3a8a";
-        pill.style.borderColor = "#60a5fa";
-        pill.style.color = "#dbeafe";
-      } else {
-        pill.style.background = "#052e16";
-        pill.style.borderColor = "#16a34a";
-        pill.style.color = "#bbf7d0";
-      }
-    }
-
-    function renderAnalysis(analysis) {
-      const resumen = analysis?.resumen || {};
-      const alertas = analysis?.alertas || [];
-
-      const criticas = resumen.criticas ?? alertas.filter(a => normalizeCriticidad(a.criticidad) === "critica").length;
-      const medias = resumen.medias ?? alertas.filter(a => normalizeCriticidad(a.criticidad) === "media").length;
-      const bajas = resumen.bajas ?? alertas.filter(a => normalizeCriticidad(a.criticidad) === "baja").length;
-      const total = resumen.total_alertas ?? alertas.length ?? 0;
-
-      document.getElementById("kpiTotal").innerText = total;
-      document.getElementById("kpiCriticas").innerText = criticas;
-      document.getElementById("kpiMedias").innerText = medias;
-      document.getElementById("kpiBajas").innerText = bajas;
-
-      document.getElementById("diagnosis").innerHTML = `
-        <strong>Riesgo principal:</strong> ${resumen.riesgo_principal || "-"}<br><br>
-        <strong>Estado:</strong> ${
-          criticas > 0
-            ? "Requiere atención prioritaria."
-            : medias > 0
-              ? "Operación con desviaciones relevantes."
-              : "Sin criticidad alta detectada."
-        }
-      `;
-
-      renderAlertBars(criticas, medias, bajas);
-      renderAlerts(alertas);
-      renderPreventive(analysis?.tendencias || []);
-    }
-
-    function renderAlertBars(criticas, medias, bajas) {
-      const max = Math.max(1, criticas, medias, bajas);
-
-      document.getElementById("alertBars").innerHTML = `
-        <div class="bar-row">
-          <div>Críticas</div>
-          <div class="bar-track"><div class="bar-fill red" style="width:${(criticas / max) * 100}%"></div></div>
-          <strong>${criticas}</strong>
-        </div>
-        <div class="bar-row">
-          <div>Medias</div>
-          <div class="bar-track"><div class="bar-fill yellow" style="width:${(medias / max) * 100}%"></div></div>
-          <strong>${medias}</strong>
-        </div>
-        <div class="bar-row">
-          <div>Bajas</div>
-          <div class="bar-track"><div class="bar-fill green" style="width:${(bajas / max) * 100}%"></div></div>
-          <strong>${bajas}</strong>
-        </div>
-      `;
-    }
-
-    function renderAlerts(alertas) {
-      const container = document.getElementById("alerts");
-      container.innerHTML = "";
-
-      if (!alertas.length) {
-        container.innerHTML = `<div class="muted">No se detectaron alertas.</div>`;
-        return;
-      }
-
-      alertas
-        .sort((a, b) => (a.prioridad || 99) - (b.prioridad || 99))
-        .forEach(alerta => {
-          const criticidad = normalizeCriticidad(alerta.criticidad);
-          const div = document.createElement("div");
-          div.className = `alert-card ${criticidad}`;
-
-          div.innerHTML = `
-            <div class="alert-head">
-              <div>
-                <span class="badge">${alerta.criticidad || "-"}</span>
-                <strong> ${alerta.equipo || "Equipo no indicado"}</strong>
-              </div>
-              <div class="muted">Prioridad ${alerta.prioridad || "-"}</div>
-            </div>
-            <div class="muted">${alerta.timestamp || "-"}</div><br>
-            <strong>Anomalía:</strong> ${alerta.anomalia || "-"}<br>
-            <strong>Causa probable:</strong> ${alerta.causa_probable || "-"}<br>
-            <strong>Impacto:</strong> ${alerta.impacto || "-"}<br>
-            <strong>Recomendación:</strong> ${alerta.recomendacion || "-"}
-          `;
-
-          container.appendChild(div);
-        });
-    }
-
-    function renderPreventive(tendencias) {
-      const container = document.getElementById("trends");
-      container.innerHTML = "";
-
-      if (!tendencias.length) {
-        container.innerHTML = `<div class="muted">Sin señales preventivas detectadas.</div>`;
-        return;
-      }
-
-      tendencias.forEach(t => {
-        const criticidad = normalizeCriticidad(t.criticidad || "media");
-        const div = document.createElement("div");
-        div.className = `alert-card ${criticidad}`;
-        div.innerHTML = `
-          <div class="alert-head">
-            <div><span class="badge">${t.criticidad || "media"}</span> <strong>${t.equipo || "Equipo"}</strong></div>
-          </div>
-          <strong>${t.tipo || "Tendencia"}</strong><br>
-          ${t.detalle || t.descripcion || "-"}
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    function normalizeCriticidad(value) {
-      const v = String(value || "").toLowerCase();
-      if (v.includes("crit")) return "critica";
-      if (v.includes("med")) return "media";
-      return "baja";
-    }
-
-    function drawTrendChart(data) {
-      const canvas = document.getElementById("trendChart");
-      const ctx = canvas.getContext("2d");
-      const parent = canvas.parentElement;
-
-      const dpr = window.devicePixelRatio || 1;
-      const cssWidth = Math.max(300, parent.clientWidth - 28);
-      const cssHeight = 260;
-
-      canvas.style.width = cssWidth + "px";
-      canvas.style.height = cssHeight + "px";
-      canvas.width = Math.floor(cssWidth * dpr);
-      canvas.height = Math.floor(cssHeight * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      const w = cssWidth;
-      const h = cssHeight;
-
-      ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = "#020617";
-      ctx.fillRect(0, 0, w, h);
-
-      drawGrid(ctx, w, h);
-
-      const rows = Array.isArray(data) && data.length ? data : [];
-
-      if (!rows.length) {
-        drawEmptyChart(ctx, w, h, "Esperando datos operacionales");
-        return;
-      }
-
-      const potencia = rows.map(r => asNumber(r.potencia ?? r.Potencia ?? r.power));
-      const irradiancia = rows.map(r => asNumber(r.irradiancia ?? r.Irradiancia ?? r.irradiance));
-      const temperatura = rows.map(r => asNumber(r.temperatura ?? r.Temperatura ?? r.temp));
-      const labels = rows.map((r, i) => String(r.timestamp || r.Timestamp || r.fecha || i + 1));
-
-      drawLineIndex(ctx, potencia, "#38bdf8", w, h);
-      drawLineIndex(ctx, irradiancia, "#facc15", w, h);
-      drawLineIndex(ctx, temperatura, "#ef4444", w, h);
-
-      drawLegend(ctx);
-      drawAxisLabels(ctx, w, h, labels);
-    }
-
-    function asNumber(value) {
-      const n = Number(String(value ?? 0).replace(",", "."));
-      return Number.isFinite(n) ? n : 0;
-    }
-
-    function drawLineIndex(ctx, values, color, w, h) {
-      const nums = values.map(v => Number.isFinite(v) ? v : 0);
-      if (!nums.length) return;
-
-      const min = Math.min(...nums);
-      const max = Math.max(...nums);
-      const span = max - min || 1;
-
-      const padL = 30;
-      const padR = 30;
-      const padT = 50;
-      const padB = 36;
-      const plotW = w - padL - padR;
-      const plotH = h - padT - padB;
-
-      ctx.beginPath();
-
-      nums.forEach((v, i) => {
-        const index = (v - min) / span;
-        const x = padL + (i / Math.max(1, nums.length - 1)) * plotW;
-        const y = padT + (1 - index) * plotH;
-
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
-
-      nums.forEach((v, i) => {
-        const index = (v - min) / span;
-        const x = padL + (i / Math.max(1, nums.length - 1)) * plotW;
-        const y = padT + (1 - index) * plotH;
-
-        ctx.beginPath();
-        ctx.arc(x, y, 2.8, 0, Math.PI * 2);
-        ctx.fillStyle = color;
-        ctx.fill();
-      });
-    }
-
-    function drawGrid(ctx, w, h) {
-      ctx.strokeStyle = "rgba(148, 163, 184, 0.16)";
-      ctx.lineWidth = 1;
-
-      for (let i = 0; i <= 4; i++) {
-        const y = 50 + i * ((h - 86) / 4);
-        ctx.beginPath();
-        ctx.moveTo(30, y);
-        ctx.lineTo(w - 30, y);
-        ctx.stroke();
-      }
-
-      ctx.fillStyle = "#64748b";
-      ctx.font = "11px Arial";
-      ctx.fillText("Índice 100", 30, 42);
-      ctx.fillText("Índice 0", 30, h - 18);
-    }
-
-    function drawLegend(ctx) {
-      const items = [
-        ["Potencia", "#38bdf8"],
-        ["Irradiancia", "#facc15"],
-        ["Temperatura", "#ef4444"]
-      ];
-
-      ctx.font = "12px Arial";
-      items.forEach((item, index) => {
-        const x = 110 + index * 125;
-        ctx.fillStyle = item[1];
-        ctx.fillRect(x, 20, 22, 4);
-        ctx.fillStyle = "#e5e7eb";
-        ctx.fillText(item[0], x + 30, 25);
-      });
-    }
-
-    function drawAxisLabels(ctx, w, h, labels) {
-      ctx.fillStyle = "#94a3b8";
-      ctx.font = "11px Arial";
-      ctx.fillText(labels[0] || "", 30, h - 8);
-      const last = labels[labels.length - 1] || "";
-      ctx.fillText(last, Math.max(30, w - 180), h - 8);
-    }
-
-    function drawEmptyChart(ctx, w, h, text) {
-      ctx.fillStyle = "#94a3b8";
-      ctx.font = "14px Arial";
-      ctx.fillText(text, 30, 82);
-    }
-
-    function getManualDataSafe() {
-      try {
-        const data = JSON.parse(document.getElementById("dataInput").value);
-        return Array.isArray(data) ? data : [];
-      } catch (e) {
-        return [];
-      }
-    }
-
-    async function sendQuestion() {
-      const input = document.getElementById("questionInput");
-      const question = input.value.trim();
-
-      if (!question) return;
-
-      if (!lastAnalysis) {
-        appendMessage("Primero debe existir un análisis desde Sheets o desde el modo manual.", "bot");
-        return;
-      }
-
-      appendMessage(question, "user");
-      input.value = "";
-
-      try {
-        const res = await fetch("/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            question: question,
-            analysis: lastAnalysis
-          })
-        });
-
-        const json = await res.json();
-
-        if (json.status === "ok") {
-          appendMessage(json.respuesta, "bot");
-        } else {
-          appendMessage(json.message || "No se pudo responder.", "bot");
-        }
-      } catch (e) {
-        appendMessage("Error conectando con /chat: " + e.message, "bot");
-      }
-    }
-
-    function appendMessage(text, type) {
-      const box = document.getElementById("chatBox");
-      const div = document.createElement("div");
-      div.className = `msg ${type}`;
-      div.innerText = text;
-      box.appendChild(div);
-      box.scrollTop = box.scrollHeight;
-    }
-
-    function clearDashboard() {
-      lastAnalysis = null;
-      lastData = null;
-      lastUpdated = null;
-
-      document.getElementById("kpiTotal").innerText = "-";
-      document.getElementById("kpiCriticas").innerText = "-";
-      document.getElementById("kpiMedias").innerText = "-";
-      document.getElementById("kpiBajas").innerText = "-";
-      document.getElementById("diagnosis").innerText = "Aún no hay análisis ejecutado.";
-      document.getElementById("alertBars").innerHTML = `<div class="muted">Esperando análisis.</div>`;
-      document.getElementById("trends").innerHTML = `<div class="muted">Sin señales preventivas cargadas.</div>`;
-      document.getElementById("alerts").innerHTML = `<div class="muted">Sin alertas todavía.</div>`;
-      document.getElementById("chatBox").innerHTML = `<div class="msg bot">Dashboard limpiado. Esperando análisis desde Google Sheets o modo manual.</div>`;
-
-      drawTrendChart([]);
-      setStatus("Dashboard limpiado.");
-    }
-
-    function loadExample() {
-      document.getElementById("dataInput").value = `[
-  {
-    "timestamp": "2026-05-02 10:00",
-    "equipo": "INV-01",
-    "irradiancia": 850,
-    "potencia": 780,
-    "temperatura": 42
-  },
-  {
-    "timestamp": "2026-05-02 10:15",
-    "equipo": "INV-01",
-    "irradiancia": 870,
-    "potencia": 795,
-    "temperatura": 43
-  },
-  {
-    "timestamp": "2026-05-02 10:30",
-    "equipo": "INV-01",
-    "irradiancia": 890,
-    "potencia": 430,
-    "temperatura": 44
-  },
-  {
-    "timestamp": "2026-05-02 10:30",
-    "equipo": "INV-02",
-    "irradiancia": 890,
-    "potencia": 815,
-    "temperatura": 43
-  },
-  {
-    "timestamp": "2026-05-02 10:45",
-    "equipo": "INV-01",
-    "irradiancia": 900,
-    "potencia": 410,
-    "temperatura": 45
-  },
-  {
-    "timestamp": "2026-05-02 10:45",
-    "equipo": "INV-02",
-    "irradiancia": 900,
-    "potencia": 825,
-    "temperatura": 44
+  <div class="panel">
+    <h3>Diagnóstico general</h3>
+    <div id="diagnosis"></div>
+  </div>
+
+</div>
+
+<div class="panel">
+  <h3>Análisis preventivo</h3>
+  <div id="trends"></div>
+</div>
+
+<div class="panel">
+  <h3>Alertas</h3>
+  <div id="alerts"></div>
+</div>
+
+</div>
+
+<!-- RIGHT -->
+<div>
+
+<div class="panel">
+  <h3>Fuente de datos</h3>
+  Google Sheets / Manual
+</div>
+
+<div class="panel chat">
+  <h3>Chat experto</h3>
+  <div id="chatBox" class="chat-box"></div>
+  <input id="q">
+  <button onclick="ask()">Enviar</button>
+</div>
+
+</div>
+
+</div>
+</div>
+
+<script>
+
+let lastAnalysis=null;
+let lastData=null;
+
+async function load(){
+  const res=await fetch("/last-analysis");
+  const j=await res.json();
+  if(j.status==="ok"){
+    lastAnalysis=j.analysis;
+    lastData=j.data;
+    render(j.analysis,j.data);
   }
-]`;
+}
+setInterval(load,5000);
+load();
 
-      setStatus("Ejemplo cargado en modo manual.");
-    }
+function render(a,data){
 
-    document.getElementById("questionInput").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") sendQuestion();
+  const r=a.resumen;
+
+  kpiTotal.innerText=r.total_alertas;
+  kpiCrit.innerText=r.criticas;
+  kpiMed.innerText=r.medias;
+  kpiLow.innerText=r.bajas;
+
+  diagnosis.innerHTML=r.riesgo_principal;
+
+  // ALERTAS
+  alerts.innerHTML="";
+  a.alertas.forEach(x=>{
+    let c="green";
+    if(x.criticidad.includes("crit")) c="red";
+    else if(x.criticidad.includes("med")) c="yellow";
+
+    alerts.innerHTML+=`<div class="alert ${c}">${x.equipo} → ${x.anomalia}</div>`;
+  });
+
+  // PIE
+  drawPie(a,data);
+
+  // TENDENCIA
+  drawTrend(data);
+
+  // PREVENTIVO
+  let html="";
+  (a.tendencias||[]).forEach(t=>{
+    html+=`<div class="alert yellow">${t.equipo} → ${t.detalle}</div>`;
+  });
+  trends.innerHTML=html||"Sin señales";
+
+}
+
+function drawPie(a,data){
+  const ctx=pie.getContext("2d");
+
+  const equipos=[...new Set(data.map(x=>x.equipo))];
+  const conAlerta=[...new Set(a.alertas.map(x=>x.equipo))];
+
+  const ok=equipos.length-conAlerta.length;
+  const bad=conAlerta.length;
+
+  const total=ok+bad;
+
+  let start=0;
+
+  ctx.clearRect(0,0,300,300);
+
+  [ok,bad].forEach((v,i)=>{
+    const angle=(v/total)*2*Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(150,150);
+    ctx.arc(150,150,100,start,start+angle);
+    ctx.fillStyle=i===0?"#22c55e":"#ef4444";
+    ctx.fill();
+    start+=angle;
+  });
+}
+
+function drawTrend(data){
+  const ctx=trendChart.getContext("2d");
+
+  ctx.clearRect(0,0,800,260);
+
+  const pot=data.map(x=>x.potencia);
+  const irr=data.map(x=>x.irradiancia);
+
+  const max=Math.max(...pot,...irr);
+
+  function line(arr,color){
+    ctx.beginPath();
+    arr.forEach((v,i)=>{
+      const x=i*(700/(arr.length-1))+50;
+      const y=250-(v/max)*200;
+      if(i===0) ctx.moveTo(x,y);
+      else ctx.lineTo(x,y);
     });
+    ctx.strokeStyle=color;
+    ctx.stroke();
+  }
 
-    window.addEventListener("load", function() {
-      drawTrendChart([]);
-      checkLastAnalysis(true);
-    });
+  line(pot,"#38bdf8");
+  line(irr,"#facc15");
+}
 
-    window.addEventListener("resize", function() {
-      drawTrendChart(lastData || getManualDataSafe());
-    });
-  </script>
+async function ask(){
+  const res=await fetch("/chat",{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({question:q.value,analysis:lastAnalysis})
+  });
+  const j=await res.json();
+  chatBox.innerHTML+=`<div class="msg bot">${j.respuesta}</div>`;
+}
+
+</script>
 </body>
 </html>
