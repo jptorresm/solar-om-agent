@@ -6,9 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -18,13 +16,17 @@
     }
 
     .page {
-      max-width: 1400px;
+      max-width: 1460px;
       margin: 0 auto;
       padding: 24px;
     }
 
     .header {
       margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
     }
 
     .header h1 {
@@ -37,17 +39,24 @@
       color: #94a3b8;
     }
 
+    .source-pill {
+      background: #052e16;
+      border: 1px solid #16a34a;
+      color: #bbf7d0;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
     .main-layout {
       display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(380px, 1fr);
+      grid-template-columns: minmax(0, 2fr) minmax(390px, 1fr);
       gap: 18px;
       align-items: start;
     }
 
-    .left-column,
-    .right-column {
-      min-width: 0;
-    }
+    .left-column, .right-column { min-width: 0; }
 
     .right-column {
       position: sticky;
@@ -76,6 +85,11 @@
       padding: 16px;
     }
 
+    .kpi.total { border-left: 6px solid #38bdf8; }
+    .kpi.critica { border-left: 6px solid #ef4444; }
+    .kpi.media { border-left: 6px solid #f59e0b; }
+    .kpi.baja { border-left: 6px solid #22c55e; }
+
     .kpi-label {
       color: #94a3b8;
       font-size: 13px;
@@ -87,9 +101,28 @@
       font-weight: 700;
     }
 
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+      gap: 18px;
+    }
+
+    .chart-wrap {
+      background: #020617;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 260px;
+      display: block;
+    }
+
     textarea {
       width: 100%;
-      min-height: 220px;
+      min-height: 190px;
       resize: vertical;
       background: #020617;
       color: #dbeafe;
@@ -111,13 +144,20 @@
       color: #020617;
     }
 
-    button:hover {
-      background: #7dd3fc;
-    }
+    button:hover { background: #7dd3fc; }
 
     button.secondary {
       background: #334155;
       color: #e5e7eb;
+    }
+
+    button.green {
+      background: #22c55e;
+      color: #052e16;
+    }
+
+    button.green:hover {
+      background: #86efac;
     }
 
     .actions {
@@ -133,6 +173,12 @@
       margin-bottom: 12px;
     }
 
+    .subtle-title {
+      color: #94a3b8;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
     .diagnosis {
       line-height: 1.5;
       color: #dbeafe;
@@ -145,23 +191,27 @@
     }
 
     .alert-card {
-      background: #172033;
-      border: 1px solid #2f3b52;
-      border-left: 6px solid #64748b;
       border-radius: 14px;
       padding: 14px;
+      border: 1px solid #2f3b52;
     }
 
     .alert-card.critica {
-      border-left-color: #ef4444;
+      background: rgba(127, 29, 29, 0.42);
+      border-color: #ef4444;
+      border-left: 8px solid #ef4444;
     }
 
     .alert-card.media {
-      border-left-color: #f59e0b;
+      background: rgba(120, 53, 15, 0.42);
+      border-color: #f59e0b;
+      border-left: 8px solid #f59e0b;
     }
 
     .alert-card.baja {
-      border-left-color: #22c55e;
+      background: rgba(20, 83, 45, 0.42);
+      border-color: #22c55e;
+      border-left: 8px solid #22c55e;
     }
 
     .alert-head {
@@ -181,23 +231,32 @@
     }
 
     .critica .badge {
-      background: #7f1d1d;
-      color: #fecaca;
+      background: #ef4444;
+      color: #fff;
     }
 
     .media .badge {
-      background: #78350f;
-      color: #fde68a;
+      background: #f59e0b;
+      color: #111827;
     }
 
     .baja .badge {
-      background: #14532d;
-      color: #bbf7d0;
+      background: #22c55e;
+      color: #052e16;
     }
 
     .muted {
       color: #94a3b8;
       font-size: 13px;
+    }
+
+    .manual-box {
+      margin-top: 14px;
+      display: none;
+    }
+
+    .manual-box.open {
+      display: block;
     }
 
     .chat-panel {
@@ -257,7 +316,7 @@
       font-size: 13px;
     }
 
-    @media (max-width: 1000px) {
+    @media (max-width: 1100px) {
       .main-layout {
         grid-template-columns: 1fr;
       }
@@ -276,8 +335,16 @@
     }
 
     @media (max-width: 800px) {
+      .header {
+        flex-direction: column;
+      }
+
       .kpis {
         grid-template-columns: repeat(2, 1fr);
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
       }
 
       .msg {
@@ -294,35 +361,65 @@
 <body>
   <div class="page">
     <div class="header">
-      <h1>Solar O&M Agent</h1>
-      <p>Dashboard de diagnóstico operacional con IA + chat experto O&M</p>
+      <div>
+        <h1>Solar O&M Agent</h1>
+        <p>Dashboard de diagnóstico operacional con IA + chat experto O&M</p>
+      </div>
+      <div id="sourcePill" class="source-pill">Fuente principal: Google Sheets</div>
     </div>
 
     <div class="main-layout">
       <div class="left-column">
         <div class="kpis">
-          <div class="kpi">
+          <div class="kpi total">
             <div class="kpi-label">Alertas totales</div>
             <div id="kpiTotal" class="kpi-value">-</div>
           </div>
-          <div class="kpi">
+          <div class="kpi critica">
             <div class="kpi-label">Críticas</div>
             <div id="kpiCriticas" class="kpi-value">-</div>
           </div>
-          <div class="kpi">
+          <div class="kpi media">
             <div class="kpi-label">Medias</div>
             <div id="kpiMedias" class="kpi-value">-</div>
           </div>
-          <div class="kpi">
+          <div class="kpi baja">
             <div class="kpi-label">Bajas</div>
             <div id="kpiBajas" class="kpi-value">-</div>
           </div>
         </div>
 
-        <div class="panel">
-          <div class="section-title">Datos operacionales</div>
+        <div class="dashboard-grid">
+          <div class="panel">
+            <div class="section-title">Tendencia operacional</div>
+            <div class="chart-wrap">
+              <canvas id="trendChart" width="760" height="280"></canvas>
+            </div>
+            <div class="muted">Gráfico basado en los datos cargados: potencia, irradiancia y temperatura normalizadas visualmente.</div>
+          </div>
 
-          <textarea id="dataInput">[
+          <div class="panel">
+            <div class="section-title">Diagnóstico general</div>
+            <div id="diagnosis" class="diagnosis">Aún no hay análisis ejecutado.</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">Fuente de datos</div>
+          <div class="muted">
+            Modo principal: Google Sheets con actualización automática. El modo manual queda como respaldo para pruebas.
+          </div>
+
+          <div class="actions">
+            <button class="green" onclick="checkLastAnalysis(true)">Actualizar desde Sheets</button>
+            <button class="secondary" onclick="toggleManual()">Mostrar/Ocultar modo manual</button>
+            <button class="secondary" onclick="clearDashboard()">Limpiar</button>
+          </div>
+
+          <div id="manualBox" class="manual-box">
+            <div class="subtle-title">Modo manual técnico: pega o edita JSON para simular escenarios</div>
+
+            <textarea id="dataInput">[
   {
     "timestamp": "2026-05-02 10:00",
     "equipo": "INV-01",
@@ -367,18 +464,13 @@
   }
 ]</textarea>
 
-          <div class="actions">
-            <button onclick="analyze()">Analizar datos</button>
-            <button class="secondary" onclick="loadExample()">Cargar ejemplo</button>
-            <button class="secondary" onclick="clearDashboard()">Limpiar</button>
+            <div class="actions">
+              <button onclick="analyzeManual()">Analizar manual</button>
+              <button class="secondary" onclick="loadExample()">Cargar ejemplo</button>
+            </div>
           </div>
 
-          <div id="status" class="status">Listo para analizar.</div>
-        </div>
-
-        <div class="panel">
-          <div class="section-title">Diagnóstico general</div>
-          <div id="diagnosis" class="diagnosis">Aún no hay análisis ejecutado.</div>
+          <div id="status" class="status">Listo. Esperando análisis desde Google Sheets.</div>
         </div>
 
         <div class="panel">
@@ -394,11 +486,11 @@
           <div class="section-title">Chat experto O&M</div>
 
           <div id="chatBox" class="chat-box">
-            <div class="msg bot">Ejecuta primero un análisis. Luego puedes preguntarme por causa probable, prioridad, acciones de mantenimiento o impacto operacional.</div>
+            <div class="msg bot">El dashboard se actualiza desde Google Sheets. Cuando exista un análisis, puedes preguntarme por causa probable, prioridad, acciones de mantenimiento o impacto operacional.</div>
           </div>
 
           <div class="chat-row">
-            <input id="questionInput" placeholder="Ej: ¿Cuál es la causa más probable de la caída de potencia?" />
+            <input id="questionInput" placeholder="Ej: ¿Cuántos equipos tienen problema?" />
             <button onclick="sendQuestion()">Enviar</button>
           </div>
         </div>
@@ -407,14 +499,58 @@
   </div>
 
   <script>
+    let lastUpdated = null;
     let lastAnalysis = null;
+    let lastData = null;
 
     function setStatus(text) {
       document.getElementById("status").innerText = text;
     }
 
-    async function analyze() {
-      setStatus("Analizando datos...");
+    function toggleManual() {
+      document.getElementById("manualBox").classList.toggle("open");
+    }
+
+    async function checkLastAnalysis(forceMessage = false) {
+      try {
+        const res = await fetch("/last-analysis");
+        const json = await res.json();
+
+        if (json.status !== "ok") {
+          if (forceMessage) setStatus("No hay análisis disponible todavía desde Sheets.");
+          return;
+        }
+
+        if (forceMessage || (json.updated && json.updated !== lastUpdated)) {
+          lastUpdated = json.updated;
+          lastAnalysis = json.analysis;
+          lastData = json.data || lastData;
+
+          renderAnalysis(json.analysis);
+
+          if (forceMessage) {
+            appendMessage("Análisis cargado desde Google Sheets.", "bot");
+          } else {
+            appendMessage("Se detectó un cambio en Google Sheets y el análisis se actualizó automáticamente.", "bot");
+          }
+
+          setStatus("Actualizado automáticamente desde Google Sheets" + (json.updated ? " · " + json.updated : ""));
+        }
+
+      } catch (e) {
+        console.log("Error consultando /last-analysis", e);
+        if (forceMessage) setStatus("Error consultando /last-analysis.");
+      }
+    }
+
+    setInterval(checkLastAnalysis, 5000);
+
+    async function analyzeManual() {
+      setStatus("Analizando datos manuales...");
+      document.getElementById("sourcePill").innerText = "Fuente actual: JSON manual";
+      document.getElementById("sourcePill").style.background = "#1e3a8a";
+      document.getElementById("sourcePill").style.borderColor = "#60a5fa";
+      document.getElementById("sourcePill").style.color = "#dbeafe";
 
       let data;
 
@@ -435,27 +571,27 @@
       try {
         const res = await fetch("/analyze", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data)
         });
 
         const json = await res.json();
 
         if (json.status !== "ok") {
-          setStatus("Error en análisis.");
+          setStatus("Error en análisis manual.");
           alert(JSON.stringify(json, null, 2));
           return;
         }
 
         lastAnalysis = json.analysis;
+        lastData = data;
         renderAnalysis(json.analysis);
-        appendMessage("Análisis ejecutado correctamente. Ya puedes preguntarme sobre el diagnóstico.", "bot");
-        setStatus("Análisis completado.");
+        drawTrendChart(data);
+        appendMessage("Análisis manual ejecutado correctamente. Ya puedes preguntarme sobre el diagnóstico.", "bot");
+        setStatus("Análisis manual completado.");
 
       } catch (e) {
-        setStatus("Error conectando con el backend.");
+        setStatus("Error conectando con /analyze.");
         alert("Error conectando con /analyze: " + e.message);
       }
     }
@@ -469,7 +605,14 @@
       document.getElementById("kpiBajas").innerText = resumen.bajas ?? 0;
 
       document.getElementById("diagnosis").innerHTML = `
-        <strong>Riesgo principal:</strong> ${resumen.riesgo_principal || "-"}
+        <strong>Riesgo principal:</strong> ${resumen.riesgo_principal || "-"}<br><br>
+        <strong>Estado:</strong> ${
+          (resumen.criticas || 0) > 0
+            ? "Requiere atención prioritaria."
+            : (resumen.medias || 0) > 0
+              ? "Operación con desviaciones relevantes."
+              : "Sin criticidad alta detectada."
+        }
       `;
 
       const alerts = analysis.alertas || [];
@@ -478,13 +621,14 @@
 
       if (!alerts.length) {
         container.innerHTML = `<div class="muted">No se detectaron alertas.</div>`;
+        drawAlertBars(0, 0, 0);
         return;
       }
 
       alerts
         .sort((a, b) => (a.prioridad || 99) - (b.prioridad || 99))
         .forEach(alerta => {
-          const criticidad = (alerta.criticidad || "baja").toLowerCase();
+          const criticidad = normalizeCriticidad(alerta.criticidad);
 
           const div = document.createElement("div");
           div.className = `alert-card ${criticidad}`;
@@ -509,6 +653,154 @@
 
           container.appendChild(div);
         });
+
+      drawAlertBars(
+        resumen.criticas ?? alerts.filter(a => normalizeCriticidad(a.criticidad) === "critica").length,
+        resumen.medias ?? alerts.filter(a => normalizeCriticidad(a.criticidad) === "media").length,
+        resumen.bajas ?? alerts.filter(a => normalizeCriticidad(a.criticidad) === "baja").length
+      );
+    }
+
+    function normalizeCriticidad(value) {
+      const v = String(value || "").toLowerCase();
+      if (v.includes("crit")) return "critica";
+      if (v.includes("med")) return "media";
+      return "baja";
+    }
+
+    function drawTrendChart(data) {
+      const canvas = document.getElementById("trendChart");
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.fillStyle = "#020617";
+      ctx.fillRect(0, 0, w, h);
+
+      const rows = Array.isArray(data) && data.length ? data : getManualDataSafe();
+      if (!rows.length) {
+        drawEmptyChart(ctx, w, h, "Sin datos operacionales cargados");
+        return;
+      }
+
+      const labels = rows.map((r, i) => String(r.timestamp || r.Timestamp || r.fecha || i + 1));
+      const potencia = rows.map(r => Number(r.potencia ?? r.Potencia ?? r.power ?? 0));
+      const irradiancia = rows.map(r => Number(r.irradiancia ?? r.Irradiancia ?? r.irradiance ?? 0));
+      const temperatura = rows.map(r => Number(r.temperatura ?? r.Temperatura ?? r.temp ?? 0));
+
+      drawGrid(ctx, w, h);
+
+      drawLine(ctx, potencia, "#38bdf8", w, h);
+      drawLine(ctx, irradiancia, "#facc15", w, h);
+      drawLine(ctx, temperatura, "#ef4444", w, h);
+
+      ctx.fillStyle = "#e5e7eb";
+      ctx.font = "12px Arial";
+      ctx.fillText("Potencia", 24, 22);
+      ctx.fillStyle = "#38bdf8";
+      ctx.fillRect(86, 14, 18, 4);
+
+      ctx.fillStyle = "#e5e7eb";
+      ctx.fillText("Irradiancia", 124, 22);
+      ctx.fillStyle = "#facc15";
+      ctx.fillRect(198, 14, 18, 4);
+
+      ctx.fillStyle = "#e5e7eb";
+      ctx.fillText("Temperatura", 236, 22);
+      ctx.fillStyle = "#ef4444";
+      ctx.fillRect(322, 14, 18, 4);
+
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "11px Arial";
+      ctx.fillText(labels[0] || "", 24, h - 12);
+      ctx.fillText(labels[labels.length - 1] || "", w - 160, h - 12);
+    }
+
+    function drawAlertBars(criticas, medias, bajas) {
+      const canvas = document.getElementById("trendChart");
+      const ctx = canvas.getContext("2d");
+
+      ctx.fillStyle = "rgba(15, 23, 42, 0.72)";
+      ctx.fillRect(canvas.width - 150, 44, 120, 92);
+
+      const max = Math.max(1, criticas, medias, bajas);
+      const items = [
+        { label: "Críticas", value: criticas, color: "#ef4444" },
+        { label: "Medias", value: medias, color: "#f59e0b" },
+        { label: "Bajas", value: bajas, color: "#22c55e" }
+      ];
+
+      ctx.font = "11px Arial";
+      items.forEach((item, index) => {
+        const y = 62 + index * 26;
+        const barW = (item.value / max) * 70;
+
+        ctx.fillStyle = "#94a3b8";
+        ctx.fillText(item.label, canvas.width - 144, y);
+
+        ctx.fillStyle = item.color;
+        ctx.fillRect(canvas.width - 84, y - 10, barW, 10);
+
+        ctx.fillStyle = "#e5e7eb";
+        ctx.fillText(String(item.value), canvas.width - 24, y);
+      });
+    }
+
+    function drawLine(ctx, values, color, w, h) {
+      const nums = values.map(v => Number.isFinite(v) ? v : 0);
+      const min = Math.min(...nums);
+      const max = Math.max(...nums);
+      const span = max - min || 1;
+
+      const padL = 24;
+      const padR = 24;
+      const padT = 42;
+      const padB = 32;
+      const plotW = w - padL - padR;
+      const plotH = h - padT - padB;
+
+      ctx.beginPath();
+      nums.forEach((v, i) => {
+        const x = padL + (i / Math.max(1, nums.length - 1)) * plotW;
+        const y = padT + (1 - ((v - min) / span)) * plotH;
+
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    }
+
+    function drawGrid(ctx, w, h) {
+      ctx.strokeStyle = "rgba(148, 163, 184, 0.18)";
+      ctx.lineWidth = 1;
+
+      for (let i = 0; i <= 4; i++) {
+        const y = 42 + i * ((h - 74) / 4);
+        ctx.beginPath();
+        ctx.moveTo(24, y);
+        ctx.lineTo(w - 24, y);
+        ctx.stroke();
+      }
+    }
+
+    function drawEmptyChart(ctx, w, h, text) {
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "14px Arial";
+      ctx.fillText(text, 24, 40);
+    }
+
+    function getManualDataSafe() {
+      try {
+        const data = JSON.parse(document.getElementById("dataInput").value);
+        return Array.isArray(data) ? data : [];
+      } catch (e) {
+        return [];
+      }
     }
 
     async function sendQuestion() {
@@ -518,7 +810,7 @@
       if (!question) return;
 
       if (!lastAnalysis) {
-        appendMessage("Primero debes ejecutar un análisis antes de usar el chat.", "bot");
+        appendMessage("Primero debe existir un análisis desde Sheets o desde el modo manual.", "bot");
         return;
       }
 
@@ -528,9 +820,7 @@
       try {
         const res = await fetch("/chat", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             question: question,
             analysis: lastAnalysis
@@ -553,25 +843,27 @@
     function appendMessage(text, type) {
       const box = document.getElementById("chatBox");
       const div = document.createElement("div");
-
       div.className = `msg ${type}`;
       div.innerText = text;
-
       box.appendChild(div);
       box.scrollTop = box.scrollHeight;
     }
 
     function clearDashboard() {
       lastAnalysis = null;
+      lastData = null;
+      lastUpdated = null;
 
       document.getElementById("kpiTotal").innerText = "-";
       document.getElementById("kpiCriticas").innerText = "-";
       document.getElementById("kpiMedias").innerText = "-";
       document.getElementById("kpiBajas").innerText = "-";
-
       document.getElementById("diagnosis").innerText = "Aún no hay análisis ejecutado.";
       document.getElementById("alerts").innerHTML = `<div class="muted">Sin alertas todavía.</div>`;
-      document.getElementById("chatBox").innerHTML = `<div class="msg bot">Ejecuta primero un análisis. Luego puedes preguntarme por causa probable, prioridad, acciones de mantenimiento o impacto operacional.</div>`;
+      document.getElementById("chatBox").innerHTML = `<div class="msg bot">Dashboard limpiado. Esperando análisis desde Google Sheets o modo manual.</div>`;
+
+      const ctx = document.getElementById("trendChart").getContext("2d");
+      drawEmptyChart(ctx, document.getElementById("trendChart").width, document.getElementById("trendChart").height, "Sin datos operacionales cargados");
 
       setStatus("Dashboard limpiado.");
     }
@@ -622,13 +914,17 @@
   }
 ]`;
 
-      setStatus("Ejemplo cargado.");
+      setStatus("Ejemplo cargado en modo manual.");
     }
 
     document.getElementById("questionInput").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") {
-        sendQuestion();
-      }
+      if (e.key === "Enter") sendQuestion();
+    });
+
+    window.addEventListener("load", function() {
+      const ctx = document.getElementById("trendChart").getContext("2d");
+      drawEmptyChart(ctx, document.getElementById("trendChart").width, document.getElementById("trendChart").height, "Esperando datos desde Google Sheets");
+      checkLastAnalysis(true);
     });
   </script>
 </body>
