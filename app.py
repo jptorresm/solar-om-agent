@@ -38,8 +38,10 @@ def health():
 # ANALYZE (NUEVO)
 # =========================
 
+from typing import List, Dict
+
 @app.post("/analyze")
-async def analyze(request: Request, x_bp_token: str = Header(None)):
+async def analyze(data: List[Dict], x_bp_token: str = Header(None)):
 
     if x_bp_token != TOKEN:
         raise HTTPException(status_code=401, detail="Unauthorized")
