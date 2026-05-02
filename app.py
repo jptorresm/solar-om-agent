@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Request, Header, HTTPException
-import requests
 import os
 import json
 from openai import OpenAI
@@ -13,15 +12,28 @@ app = FastAPI()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 TOKEN = os.getenv("BP_PROXY_TOKEN")
-SHEETS_WEBHOOK = os.getenv("SHEETS_WEBHOOK")
 
 if not OPENAI_API_KEY:
     raise Exception("Falta OPENAI_API_KEY")
 
-if not TOKEN:
-    raise Exception("Falta BP_PROXY_TOKEN")
-
 client = OpenAI(api_key=OPENAI_API_KEY)
+
+# =========================
+# MEMORIA SIMPLE
+# =========================
+
+LAST_ANALYSIS = None
+LAST_DATA = None
+
+# =========================
+# HELPERS
+# =========================
+
+def clean_json(text):
+    text = text.strip()
+    if text.startswith("```"):
+        text = text.replace("```json", "").replace("```", "").strip()
+    return text
 
 # =========================
 # HEALTH
@@ -33,7 +45,10 @@ def root():
 
 @app.get("/health")
 def health():
-    return {"status": "running"}
+    return {
+        "status": "running",
+        "has_analysis": LAST_ANALYSIS is not None
+    }
 
 # =========================
 # ANALYZE
@@ -42,7 +57,9 @@ def health():
 @app.post("/analyze")
 async def analyze(data: List[Dict], x_bp_token: str = Header(None)):
 
-    # Seguridad opcional (puedes reactivar después)
+    global LAST_ANALYSIS, LAST_DATA
+
+    # 🔒 Seguridad opcional (desactivada para demo)
     # if x_bp_token != TOKEN:
     #     raise HTTPException(status_code=401, detail="Unauthorized")
 
@@ -105,9 +122,13 @@ Devuelve SOLO JSON:
     result_text = response.choices[0].message.content
 
     try:
-        result_json = json.loads(result_text)
+        result_json = json.loads(clean_json(result_text))
     except:
         return {"status": "error", "raw": result_text}
+
+    # 💾 guardar memoria
+    LAST_ANALYSIS = result_json
+    LAST_DATA = data
 
     return {
         "status": "ok",
@@ -121,16 +142,19 @@ Devuelve SOLO JSON:
 @app.post("/chat")
 async def chat(body: dict, x_bp_token: str = Header(None)):
 
-    if x_bp_token != TOKEN:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    global LAST_ANALYSIS, LAST_DATA
+
+    # 🔒 Seguridad opcional (alineada con analyze)
+    # if x_bp_token != TOKEN:
+    #     raise HTTPException(status_code=401, detail="Unauthorized")
 
     question = body.get("question")
-    context = body.get("analysis")
+    context = body.get("analysis") or LAST_ANALYSIS
 
     if not context:
         return {
             "status": "error",
-            "message": "Debes enviar el analysis en el body."
+            "message": "No hay análisis previo cargado. Ejecuta primero /analyze."
         }
 
     prompt = f"""
@@ -139,14 +163,17 @@ Eres jefe O&M solar.
 ANÁLISIS:
 {context}
 
+DATOS ORIGINALES:
+{LAST_DATA}
+
 PREGUNTA:
 {question}
 
 INSTRUCCIONES:
-- Usa SOLO el análisis
-- No generalices
+- Usa SOLO el análisis y datos
 - No inventes
 - Prioriza acción técnica
+- Sé concreto
 
 RESPUESTA:
 """
@@ -172,8 +199,9 @@ RESPUESTA:
 @app.post("/legacy-eval")
 async def evaluar(request: Request, x_bp_token: str = Header(None)):
 
-    if x_bp_token != TOKEN:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    # 🔒 opcional
+    # if x_bp_token != TOKEN:
+    #     raise HTTPException(status_code=401, detail="Unauthorized")
 
     body = await request.json()
 
