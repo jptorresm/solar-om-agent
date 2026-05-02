@@ -14,9 +14,6 @@ OPENAI_API_KEY = os.getenv("sk-proj-jBtDRyr5hUeJLArMa41N6CrF2pZ-CA9uOhjMKqKbqAgu
 TOKEN = os.getenv("BP_PROXY_TOKEN")
 SHEETS_WEBHOOK = os.getenv("SHEETS_WEBHOOK")
 
-if not OPENAI_API_KEY:
-    raise Exception("Falta OPENAI_API_KEY")
-
 if not TOKEN:
     raise Exception("Falta BP_PROXY_TOKEN")
 
