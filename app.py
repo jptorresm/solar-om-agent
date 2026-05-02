@@ -139,12 +139,11 @@ Devuelve SOLO JSON válido, sin markdown, sin explicación adicional:
 # =========================
 
 @app.post("/chat")
-async def chat(request: Request, x_bp_token: str = Header(None)):
+async def chat(body: dict, x_bp_token: str = Header(None)):
 
     if x_bp_token != TOKEN:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
-    body = await request.json()
     question = body.get("question", "")
 
     context = LAST_ANALYSIS.get("analysis", "Sin análisis previo")
