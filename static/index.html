@@ -18,7 +18,7 @@
     }
 
     .page {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
       padding: 24px;
     }
@@ -35,6 +35,23 @@
     .header p {
       margin: 8px 0 0;
       color: #94a3b8;
+    }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(380px, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .left-column,
+    .right-column {
+      min-width: 0;
+    }
+
+    .right-column {
+      position: sticky;
+      top: 20px;
     }
 
     .panel {
@@ -183,8 +200,15 @@
       font-size: 13px;
     }
 
+    .chat-panel {
+      height: calc(100vh - 48px);
+      display: flex;
+      flex-direction: column;
+    }
+
     .chat-box {
-      height: 300px;
+      flex: 1;
+      min-height: 420px;
       overflow-y: auto;
       background: #020617;
       border: 1px solid #334155;
@@ -194,7 +218,7 @@
     }
 
     .msg {
-      max-width: 82%;
+      max-width: 92%;
       padding: 11px 13px;
       border-radius: 14px;
       margin-bottom: 10px;
@@ -233,6 +257,24 @@
       font-size: 13px;
     }
 
+    @media (max-width: 1000px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .right-column {
+        position: static;
+      }
+
+      .chat-panel {
+        height: auto;
+      }
+
+      .chat-box {
+        min-height: 300px;
+      }
+    }
+
     @media (max-width: 800px) {
       .kpis {
         grid-template-columns: repeat(2, 1fr);
@@ -256,29 +298,31 @@
       <p>Dashboard de diagnóstico operacional con IA + chat experto O&M</p>
     </div>
 
-    <div class="kpis">
-      <div class="kpi">
-        <div class="kpi-label">Alertas totales</div>
-        <div id="kpiTotal" class="kpi-value">-</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Críticas</div>
-        <div id="kpiCriticas" class="kpi-value">-</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Medias</div>
-        <div id="kpiMedias" class="kpi-value">-</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Bajas</div>
-        <div id="kpiBajas" class="kpi-value">-</div>
-      </div>
-    </div>
+    <div class="main-layout">
+      <div class="left-column">
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi-label">Alertas totales</div>
+            <div id="kpiTotal" class="kpi-value">-</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Críticas</div>
+            <div id="kpiCriticas" class="kpi-value">-</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Medias</div>
+            <div id="kpiMedias" class="kpi-value">-</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Bajas</div>
+            <div id="kpiBajas" class="kpi-value">-</div>
+          </div>
+        </div>
 
-    <div class="panel">
-      <div class="section-title">Datos operacionales</div>
+        <div class="panel">
+          <div class="section-title">Datos operacionales</div>
 
-      <textarea id="dataInput">[
+          <textarea id="dataInput">[
   {
     "timestamp": "2026-05-02 10:00",
     "equipo": "INV-01",
@@ -323,37 +367,41 @@
   }
 ]</textarea>
 
-      <div class="actions">
-        <button onclick="analyze()">Analizar datos</button>
-        <button class="secondary" onclick="loadExample()">Cargar ejemplo</button>
-        <button class="secondary" onclick="clearDashboard()">Limpiar</button>
+          <div class="actions">
+            <button onclick="analyze()">Analizar datos</button>
+            <button class="secondary" onclick="loadExample()">Cargar ejemplo</button>
+            <button class="secondary" onclick="clearDashboard()">Limpiar</button>
+          </div>
+
+          <div id="status" class="status">Listo para analizar.</div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">Diagnóstico general</div>
+          <div id="diagnosis" class="diagnosis">Aún no hay análisis ejecutado.</div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">Alertas priorizadas</div>
+          <div id="alerts" class="alerts">
+            <div class="muted">Sin alertas todavía.</div>
+          </div>
+        </div>
       </div>
 
-      <div id="status" class="status">Listo para analizar.</div>
-    </div>
+      <div class="right-column">
+        <div class="panel chat-panel">
+          <div class="section-title">Chat experto O&M</div>
 
-    <div class="panel">
-      <div class="section-title">Diagnóstico general</div>
-      <div id="diagnosis" class="diagnosis">Aún no hay análisis ejecutado.</div>
-    </div>
+          <div id="chatBox" class="chat-box">
+            <div class="msg bot">Ejecuta primero un análisis. Luego puedes preguntarme por causa probable, prioridad, acciones de mantenimiento o impacto operacional.</div>
+          </div>
 
-    <div class="panel">
-      <div class="section-title">Alertas priorizadas</div>
-      <div id="alerts" class="alerts">
-        <div class="muted">Sin alertas todavía.</div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="section-title">Chat experto O&M</div>
-
-      <div id="chatBox" class="chat-box">
-        <div class="msg bot">Ejecuta primero un análisis. Luego puedes preguntarme por causa probable, prioridad, acciones de mantenimiento o impacto operacional.</div>
-      </div>
-
-      <div class="chat-row">
-        <input id="questionInput" placeholder="Ej: ¿Cuál es la causa más probable de la caída de potencia?" />
-        <button onclick="sendQuestion()">Enviar</button>
+          <div class="chat-row">
+            <input id="questionInput" placeholder="Ej: ¿Cuál es la causa más probable de la caída de potencia?" />
+            <button onclick="sendQuestion()">Enviar</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -469,6 +517,11 @@
 
       if (!question) return;
 
+      if (!lastAnalysis) {
+        appendMessage("Primero debes ejecutar un análisis antes de usar el chat.", "bot");
+        return;
+      }
+
       appendMessage(question, "user");
       input.value = "";
 
@@ -479,7 +532,8 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            question: question
+            question: question,
+            analysis: lastAnalysis
           })
         });
 
