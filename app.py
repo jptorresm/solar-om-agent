@@ -13,7 +13,8 @@ app = FastAPI()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 TOKEN = os.getenv("BP_PROXY_TOKEN")
 SHEETS_WEBHOOK = os.getenv("SHEETS_WEBHOOK")
-
+print("OPENAI_API_KEY cargada:", OPENAI_API_KEY[:12] if OPENAI_API_KEY else "None")
+print("OPENAI_API_KEY largo:", len(OPENAI_API_KEY) if OPENAI_API_KEY else 0)
 if not TOKEN:
     raise Exception("Falta BP_PROXY_TOKEN")
 
