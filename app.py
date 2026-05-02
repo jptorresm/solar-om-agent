@@ -43,49 +43,14 @@ from typing import List, Dict
 @app.post("/analyze")
 async def analyze(data: List[Dict], x_bp_token: str = Header(None)):
 
-#    if x_bp_token != TOKEN:
-#        raise HTTPException(status_code=401, detail="Unauthorized")
+    global LAST_ANALYSIS  # ← PRIMERA línea dentro de la función
 
+    # if x_bp_token != TOKEN:
+    #     raise HTTPException(status_code=401, detail="Unauthorized")
 
     prompt = f"""
-Eres un ingeniero experto en O&M solar.
-
-Analiza esta serie de datos:
-
-{data}
-
-Detecta:
-- anomalías
-- pérdidas de producción
-- tendencias
-- desviaciones por equipo
-- causa probable
-
-Prioriza por criticidad.
-
-Devuelve SOLO JSON:
-
-{{
-  "resumen": {{
-    "total_alertas": number,
-    "criticas": number,
-    "medias": number,
-    "bajas": number,
-    "riesgo_principal": "texto"
-  }},
-  "alertas": [
-    {{
-      "equipo": "string",
-      "criticidad": "critica/media/baja",
-      "anomalia": "descripcion",
-      "causa_probable": "texto",
-      "impacto": "texto",
-      "recomendacion": "accion concreta",
-      "prioridad": number
-    }}
-  ]
-}}
-"""
+    ...
+    """
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -93,28 +58,27 @@ Devuelve SOLO JSON:
         temperature=0
     )
 
-import json
+    import json
 
-result_text = response.choices[0].message.content
+    result_text = response.choices[0].message.content
 
-try:
-    result_json = json.loads(result_text)
-except:
-    return {
-        "status": "error",
-        "raw": result_text
-    }
-    global LAST_ANALYSIS
+    try:
+        result_json = json.loads(result_text)
+    except:
+        return {
+            "status": "error",
+            "raw": result_text
+        }
+
     LAST_ANALYSIS = {
         "data": data,
-        "analysis": result_text
+        "analysis": result_json
     }
 
     return {
         "status": "ok",
         "analysis": result_json
     }
-
 # =========================
 # CHAT EXPERTO (MEJORADO)
 # =========================
