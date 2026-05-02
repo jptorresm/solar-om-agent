@@ -1,1 +1,581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Solar O&M Agent</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1120;
+      color: #e5e7eb;
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .header {
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 34px;
+    }
+
+    .header p {
+      margin: 8px 0 0;
+      color: #94a3b8;
+    }
+
+    .panel {
+      background: #111827;
+      border: 1px solid #263244;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .kpi {
+      background: #172033;
+      border: 1px solid #2f3b52;
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .kpi-label {
+      color: #94a3b8;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      resize: vertical;
+      background: #020617;
+      color: #dbeafe;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 14px;
+      font-family: monospace;
+      font-size: 13px;
+      outline: none;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #38bdf8;
+      color: #020617;
+    }
+
+    button:hover {
+      background: #7dd3fc;
+    }
+
+    button.secondary {
+      background: #334155;
+      color: #e5e7eb;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .diagnosis {
+      line-height: 1.5;
+      color: #dbeafe;
+    }
+
+    .alerts {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .alert-card {
+      background: #172033;
+      border: 1px solid #2f3b52;
+      border-left: 6px solid #64748b;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .alert-card.critica {
+      border-left-color: #ef4444;
+    }
+
+    .alert-card.media {
+      border-left-color: #f59e0b;
+    }
+
+    .alert-card.baja {
+      border-left-color: #22c55e;
+    }
+
+    .alert-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #334155;
+    }
+
+    .critica .badge {
+      background: #7f1d1d;
+      color: #fecaca;
+    }
+
+    .media .badge {
+      background: #78350f;
+      color: #fde68a;
+    }
+
+    .baja .badge {
+      background: #14532d;
+      color: #bbf7d0;
+    }
+
+    .muted {
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    .chat-box {
+      height: 300px;
+      overflow-y: auto;
+      background: #020617;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .msg {
+      max-width: 82%;
+      padding: 11px 13px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    .msg.user {
+      margin-left: auto;
+      background: #075985;
+    }
+
+    .msg.bot {
+      margin-right: auto;
+      background: #1e293b;
+    }
+
+    .chat-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-row input {
+      flex: 1;
+      background: #020617;
+      color: #e5e7eb;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 12px;
+      outline: none;
+    }
+
+    .status {
+      margin-top: 10px;
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    @media (max-width: 800px) {
+      .kpis {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .msg {
+        max-width: 100%;
+      }
+
+      .chat-row {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="header">
+      <h1>Solar O&M Agent</h1>
+      <p>Dashboard de diagnóstico operacional con IA + chat experto O&M</p>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi">
+        <div class="kpi-label">Alertas totales</div>
+        <div id="kpiTotal" class="kpi-value">-</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Críticas</div>
+        <div id="kpiCriticas" class="kpi-value">-</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Medias</div>
+        <div id="kpiMedias" class="kpi-value">-</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Bajas</div>
+        <div id="kpiBajas" class="kpi-value">-</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">Datos operacionales</div>
+
+      <textarea id="dataInput">[
+  {
+    "timestamp": "2026-05-02 10:00",
+    "equipo": "INV-01",
+    "irradiancia": 850,
+    "potencia": 780,
+    "temperatura": 42
+  },
+  {
+    "timestamp": "2026-05-02 10:15",
+    "equipo": "INV-01",
+    "irradiancia": 870,
+    "potencia": 795,
+    "temperatura": 43
+  },
+  {
+    "timestamp": "2026-05-02 10:30",
+    "equipo": "INV-01",
+    "irradiancia": 890,
+    "potencia": 430,
+    "temperatura": 44
+  },
+  {
+    "timestamp": "2026-05-02 10:30",
+    "equipo": "INV-02",
+    "irradiancia": 890,
+    "potencia": 815,
+    "temperatura": 43
+  },
+  {
+    "timestamp": "2026-05-02 10:45",
+    "equipo": "INV-01",
+    "irradiancia": 900,
+    "potencia": 410,
+    "temperatura": 45
+  },
+  {
+    "timestamp": "2026-05-02 10:45",
+    "equipo": "INV-02",
+    "irradiancia": 900,
+    "potencia": 825,
+    "temperatura": 44
+  }
+]</textarea>
+
+      <div class="actions">
+        <button onclick="analyze()">Analizar datos</button>
+        <button class="secondary" onclick="loadExample()">Cargar ejemplo</button>
+        <button class="secondary" onclick="clearDashboard()">Limpiar</button>
+      </div>
+
+      <div id="status" class="status">Listo para analizar.</div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">Diagnóstico general</div>
+      <div id="diagnosis" class="diagnosis">Aún no hay análisis ejecutado.</div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">Alertas priorizadas</div>
+      <div id="alerts" class="alerts">
+        <div class="muted">Sin alertas todavía.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">Chat experto O&M</div>
+
+      <div id="chatBox" class="chat-box">
+        <div class="msg bot">Ejecuta primero un análisis. Luego puedes preguntarme por causa probable, prioridad, acciones de mantenimiento o impacto operacional.</div>
+      </div>
+
+      <div class="chat-row">
+        <input id="questionInput" placeholder="Ej: ¿Cuál es la causa más probable de la caída de potencia?" />
+        <button onclick="sendQuestion()">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let lastAnalysis = null;
+
+    function setStatus(text) {
+      document.getElementById("status").innerText = text;
+    }
+
+    async function analyze() {
+      setStatus("Analizando datos...");
+
+      let data;
+
+      try {
+        data = JSON.parse(document.getElementById("dataInput").value);
+      } catch (e) {
+        setStatus("Error: el JSON no es válido.");
+        alert("El JSON de datos no es válido.");
+        return;
+      }
+
+      if (!Array.isArray(data)) {
+        setStatus("Error: el JSON debe ser una lista.");
+        alert("El backend actual espera una lista directa: [ {...}, {...} ]");
+        return;
+      }
+
+      try {
+        const res = await fetch("/analyze", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        const json = await res.json();
+
+        if (json.status !== "ok") {
+          setStatus("Error en análisis.");
+          alert(JSON.stringify(json, null, 2));
+          return;
+        }
+
+        lastAnalysis = json.analysis;
+        renderAnalysis(json.analysis);
+        appendMessage("Análisis ejecutado correctamente. Ya puedes preguntarme sobre el diagnóstico.", "bot");
+        setStatus("Análisis completado.");
+
+      } catch (e) {
+        setStatus("Error conectando con el backend.");
+        alert("Error conectando con /analyze: " + e.message);
+      }
+    }
+
+    function renderAnalysis(analysis) {
+      const resumen = analysis.resumen || {};
+
+      document.getElementById("kpiTotal").innerText = resumen.total_alertas ?? 0;
+      document.getElementById("kpiCriticas").innerText = resumen.criticas ?? 0;
+      document.getElementById("kpiMedias").innerText = resumen.medias ?? 0;
+      document.getElementById("kpiBajas").innerText = resumen.bajas ?? 0;
+
+      document.getElementById("diagnosis").innerHTML = `
+        <strong>Riesgo principal:</strong> ${resumen.riesgo_principal || "-"}
+      `;
+
+      const alerts = analysis.alertas || [];
+      const container = document.getElementById("alerts");
+      container.innerHTML = "";
+
+      if (!alerts.length) {
+        container.innerHTML = `<div class="muted">No se detectaron alertas.</div>`;
+        return;
+      }
+
+      alerts
+        .sort((a, b) => (a.prioridad || 99) - (b.prioridad || 99))
+        .forEach(alerta => {
+          const criticidad = (alerta.criticidad || "baja").toLowerCase();
+
+          const div = document.createElement("div");
+          div.className = `alert-card ${criticidad}`;
+
+          div.innerHTML = `
+            <div class="alert-head">
+              <div>
+                <span class="badge">${alerta.criticidad || "-"}</span>
+                <strong> ${alerta.equipo || "Equipo no indicado"}</strong>
+              </div>
+              <div class="muted">Prioridad ${alerta.prioridad || "-"}</div>
+            </div>
+
+            <div class="muted">${alerta.timestamp || "-"}</div>
+            <br>
+
+            <strong>Anomalía:</strong> ${alerta.anomalia || "-"}<br>
+            <strong>Causa probable:</strong> ${alerta.causa_probable || "-"}<br>
+            <strong>Impacto:</strong> ${alerta.impacto || "-"}<br>
+            <strong>Recomendación:</strong> ${alerta.recomendacion || "-"}
+          `;
+
+          container.appendChild(div);
+        });
+    }
+
+    async function sendQuestion() {
+      const input = document.getElementById("questionInput");
+      const question = input.value.trim();
+
+      if (!question) return;
+
+      appendMessage(question, "user");
+      input.value = "";
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            question: question
+          })
+        });
+
+        const json = await res.json();
+
+        if (json.status === "ok") {
+          appendMessage(json.respuesta, "bot");
+        } else {
+          appendMessage(json.message || "No se pudo responder.", "bot");
+        }
+
+      } catch (e) {
+        appendMessage("Error conectando con /chat: " + e.message, "bot");
+      }
+    }
+
+    function appendMessage(text, type) {
+      const box = document.getElementById("chatBox");
+      const div = document.createElement("div");
+
+      div.className = `msg ${type}`;
+      div.innerText = text;
+
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function clearDashboard() {
+      lastAnalysis = null;
+
+      document.getElementById("kpiTotal").innerText = "-";
+      document.getElementById("kpiCriticas").innerText = "-";
+      document.getElementById("kpiMedias").innerText = "-";
+      document.getElementById("kpiBajas").innerText = "-";
+
+      document.getElementById("diagnosis").innerText = "Aún no hay análisis ejecutado.";
+      document.getElementById("alerts").innerHTML = `<div class="muted">Sin alertas todavía.</div>`;
+      document.getElementById("chatBox").innerHTML = `<div class="msg bot">Ejecuta primero un análisis. Luego puedes preguntarme por causa probable, prioridad, acciones de mantenimiento o impacto operacional.</div>`;
+
+      setStatus("Dashboard limpiado.");
+    }
+
+    function loadExample() {
+      document.getElementById("dataInput").value = `[
+  {
+    "timestamp": "2026-05-02 10:00",
+    "equipo": "INV-01",
+    "irradiancia": 850,
+    "potencia": 780,
+    "temperatura": 42
+  },
+  {
+    "timestamp": "2026-05-02 10:15",
+    "equipo": "INV-01",
+    "irradiancia": 870,
+    "potencia": 795,
+    "temperatura": 43
+  },
+  {
+    "timestamp": "2026-05-02 10:30",
+    "equipo": "INV-01",
+    "irradiancia": 890,
+    "potencia": 430,
+    "temperatura": 44
+  },
+  {
+    "timestamp": "2026-05-02 10:30",
+    "equipo": "INV-02",
+    "irradiancia": 890,
+    "potencia": 815,
+    "temperatura": 43
+  },
+  {
+    "timestamp": "2026-05-02 10:45",
+    "equipo": "INV-01",
+    "irradiancia": 900,
+    "potencia": 410,
+    "temperatura": 45
+  },
+  {
+    "timestamp": "2026-05-02 10:45",
+    "equipo": "INV-02",
+    "irradiancia": 900,
+    "potencia": 825,
+    "temperatura": 44
+  }
+]`;
+
+      setStatus("Ejemplo cargado.");
+    }
+
+    document.getElementById("questionInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        sendQuestion();
+      }
+    });
+  </script>
+</body>
+</html>
