@@ -1,3 +1,4 @@
+from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Request, Header, HTTPException
 import os
 import json
@@ -227,3 +228,4 @@ Devuelve JSON.
         "status": "ok",
         "evaluacion": response.choices[0].message.content
     }
+app.mount("/web", StaticFiles(directory="static", html=True), name="web")
